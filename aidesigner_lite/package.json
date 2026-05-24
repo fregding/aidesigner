@@ -1,0 +1,13 @@
+{
+  "name": "aidesigner-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "./scripts/local-docker.sh",
+    "docker:local": "./scripts/local-docker.sh",
+    "docker:deploy": "./scripts/deploy-docker.sh",
+    "package": "./scripts/package-release.sh",
+    "backup": "./scripts/backup.sh",
+    "check": "npm --prefix backend run check"
+  }
+}

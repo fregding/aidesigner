@@ -1,0 +1,2 @@
+4cc632241f255b8128041d55ee879af871e4f0982865fc1affabbfb79360784f  backend/src/services/aiService.js
+700d53dcba47f9eeb6669307c52cfe1ede1436fe96995660dcb813d66fc40d0c  docker-compose.node-only.yml
