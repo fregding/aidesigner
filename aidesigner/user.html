@@ -1,0 +1,3850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - AI Designer</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function () {
+            const themes = ['light', 'dark'];
+            const aliases = { wallet: 'credits', usage: 'credits', redeem: 'credits', account: 'settings', security: 'settings' };
+            const views = ['overview', 'credits', 'tasks', 'settings'];
+            const normalizeTheme = value => themes.includes(value) ? value : 'dark';
+            const normalizeView = value => views.includes(value) ? value : (aliases[value] || 'overview');
+            try {
+                document.documentElement.dataset.theme = normalizeTheme(localStorage.getItem('aimaster_theme'));
+                document.documentElement.style.colorScheme = document.documentElement.dataset.theme;
+            } catch (error) {
+                document.documentElement.dataset.theme = 'dark';
+                document.documentElement.style.colorScheme = 'dark';
+            }
+            try {
+                const params = new URLSearchParams(window.location.search);
+                document.documentElement.dataset.initialView = normalizeView(params.get('view') || String(window.location.hash || '').replace(/^#/, ''));
+            } catch (error) {
+                document.documentElement.dataset.initialView = 'overview';
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --account-bg: #f5f7fb;
+            --account-sidebar: #111827;
+            --account-sidebar-soft: #1f2937;
+            --account-text: #172033;
+            --account-muted: #667085;
+            --account-border: #d9dee8;
+            --account-panel: #ffffff;
+            --account-panel-soft: #f8fafc;
+            --account-accent: #2563eb;
+            --account-accent-soft: #eff6ff;
+            --account-success: #0f9f6e;
+            --account-danger: #d92d20;
+            --account-warning: #b54708;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--account-bg);
+            color: var(--account-text);
+            font-family: "Noto Sans SC", "Outfit", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .account-app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 264px minmax(0, 1fr);
+        }
+
+        .account-sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 20px 16px;
+            background: var(--account-sidebar);
+            color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px 12px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px rgba(255, 107, 74, 0.24));
+        }
+
+        .sidebar-profile {
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            display: grid;
+            grid-template-columns: 40px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #e0ecff;
+            color: #1d4ed8;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+
+        .profile-name,
+        .profile-email {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-name {
+            font-size: 0.94rem;
+            font-weight: 700;
+        }
+
+        .profile-email {
+            margin-top: 2px;
+            color: #aeb8c8;
+            font-size: 0.78rem;
+        }
+
+        .nav-group {
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav-section {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav-label {
+            padding: 0 8px 4px;
+            color: #8d99ae;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            width: 100%;
+            min-height: 42px;
+            border: 0;
+            border-radius: 8px;
+            padding: 0 10px;
+            color: #d6dce8;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .nav-copy {
+            min-width: 0;
+            display: block;
+        }
+
+        .nav-copy strong {
+            font-size: 1rem;
+            line-height: 1.15;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #ffffff;
+            color: #111827;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            display: grid;
+            gap: 8px;
+        }
+
+        .sidebar-link,
+        .sidebar-logout {
+            min-height: 38px;
+            border-radius: 8px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #d6dce8;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .tool-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .tool-link {
+            min-height: 40px;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-logout:hover {
+            background: var(--account-sidebar-soft);
+            color: #ffffff;
+        }
+
+        .account-workspace {
+            min-width: 0;
+            padding: 24px 28px 40px;
+        }
+
+        .workspace-topbar {
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .page-title {
+            margin: 0;
+            color: var(--account-text);
+            font-size: 1.45rem;
+            font-weight: 800;
+        }
+
+        .page-subtitle {
+            margin: 5px 0 0;
+            color: var(--account-muted);
+            font-size: 0.9rem;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-btn {
+            min-height: 38px;
+            border-radius: 8px;
+            padding: 0 14px;
+            border: 1px solid var(--account-border);
+            background: #ffffff;
+            color: var(--account-text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font: inherit;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .account-btn.primary {
+            border-color: var(--account-accent);
+            background: var(--account-accent);
+            color: #ffffff;
+        }
+
+        .account-btn.ghost {
+            background: transparent;
+        }
+
+        .account-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.68;
+        }
+
+        .view {
+            display: none;
+            padding: 0;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        html[data-initial-view="credits"] #view-overview,
+        html[data-initial-view="tasks"] #view-overview,
+        html[data-initial-view="settings"] #view-overview {
+            display: none;
+        }
+
+        html[data-initial-view="credits"] #view-credits {
+            display: block;
+        }
+
+        html[data-initial-view="tasks"] #view-tasks {
+            display: block;
+        }
+
+        html[data-initial-view="settings"] #view-settings {
+            display: block;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, 1.2fr) repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .panel,
+        .metric-card,
+        .balance-panel {
+            background: var(--account-panel);
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+        }
+
+        .balance-panel {
+            padding: 18px;
+            min-height: 156px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .balance-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .balance-row > div:first-child {
+            min-width: 0;
+        }
+
+        .balance-label,
+        .metric-label,
+        .table-note {
+            color: var(--account-muted);
+            font-size: 0.82rem;
+        }
+
+        .balance-value {
+            margin-top: 8px;
+            color: var(--account-text);
+            font-family: "Outfit", sans-serif;
+            font-size: 2.5rem;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .balance-status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            color: #1d4ed8;
+            background: var(--account-accent-soft);
+            font-size: 0.8rem;
+            font-weight: 700;
+            max-width: min(220px, 44vw);
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+            text-align: right;
+        }
+
+        .usage-progress {
+            margin-top: 16px;
+            height: 8px;
+            border-radius: 999px;
+            background: #e8edf5;
+            overflow: hidden;
+        }
+
+        .usage-progress span {
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--account-accent);
+            transition: width 0.25s ease;
+        }
+
+        .balance-meta {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--account-muted);
+            font-size: 0.82rem;
+        }
+
+        .metric-card {
+            padding: 16px;
+            min-height: 124px;
+        }
+
+        .metric-value {
+            margin-top: 14px;
+            color: var(--account-text);
+            font-family: "Outfit", sans-serif;
+            font-size: 1.8rem;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .metric-value.compact {
+            font-size: 1.25rem;
+            line-height: 1.2;
+        }
+
+        .metric-help {
+            margin-top: 8px;
+            color: var(--account-muted);
+            font-size: 0.78rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+            gap: 14px;
+        }
+
+        .panel {
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--account-text);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .quick-action {
+            min-height: 78px;
+            border-radius: 8px;
+            border: 1px solid var(--account-border);
+            background: var(--account-panel-soft);
+            color: var(--account-text);
+            padding: 12px;
+            text-align: left;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .quick-action strong {
+            font-size: 0.95rem;
+        }
+
+        .quick-action span {
+            color: var(--account-muted);
+            font-size: 0.78rem;
+        }
+
+        .referral-card {
+            display: grid;
+            gap: 14px;
+        }
+
+        .referral-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .referral-stat {
+            min-height: 72px;
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            background: var(--account-panel-soft);
+            padding: 12px;
+        }
+
+        .referral-stat strong {
+            display: block;
+            margin-top: 6px;
+            color: var(--account-text);
+            font-family: "Outfit", sans-serif;
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        .referral-fields {
+            display: grid;
+            gap: 10px;
+        }
+
+        .copy-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+        }
+
+        .copy-row input {
+            min-height: 40px;
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            padding: 0 12px;
+            background: #ffffff;
+            color: var(--account-text);
+            font: inherit;
+            outline: none;
+        }
+
+        .copy-row input.is-empty {
+            color: var(--account-muted);
+            border-style: dashed;
+        }
+
+        .referral-note {
+            color: var(--account-muted);
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+
+        .wallet-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.76fr);
+            gap: 14px;
+            align-items: start;
+        }
+
+        .wallet-recharge-panel,
+        .wallet-referral-panel {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .wallet-card-head {
+            min-height: 78px;
+            padding: 18px;
+            border-bottom: 1px solid var(--account-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .wallet-head-copy {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wallet-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--account-accent-soft);
+            color: var(--account-accent);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+
+        .wallet-icon svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .wallet-head-text {
+            min-width: 0;
+        }
+
+        .wallet-head-text p {
+            margin: 4px 0 0;
+            color: var(--account-muted);
+            font-size: 0.82rem;
+        }
+
+        .wallet-user-pill {
+            color: var(--account-muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .wallet-stat-grid {
+            padding: 16px 18px 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .wallet-stat-box,
+        .wallet-buy-box,
+        .wallet-package-card,
+        .wallet-pay-hint,
+        .wallet-record-tabs,
+        .wallet-tip-list {
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            background: var(--account-panel-soft);
+        }
+
+        .wallet-stat-box {
+            min-height: 72px;
+            padding: 12px 14px;
+        }
+
+        .wallet-stat-value {
+            margin-top: 7px;
+            color: var(--account-text);
+            font-family: "Outfit", sans-serif;
+            font-size: 1.25rem;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .wallet-buy-box {
+            margin: 14px 18px 0;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .wallet-buy-copy {
+            color: var(--account-text);
+            font-weight: 800;
+        }
+
+        .wallet-buy-copy span {
+            display: block;
+            margin-top: 4px;
+            color: var(--account-muted);
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        .wallet-recharge-offer {
+            margin: 14px 18px 0;
+        }
+
+        .wallet-offer-head {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .wallet-offer-title {
+            color: var(--account-text);
+            font-size: 0.95rem;
+            font-weight: 900;
+        }
+
+        .wallet-offer-subtitle {
+            margin-top: 4px;
+            color: var(--account-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .wallet-pay-pill {
+            min-height: 30px;
+            border-radius: 999px;
+            padding: 0 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--account-accent);
+            font-size: 0.76rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .wallet-package-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .wallet-package-card {
+            position: relative;
+            min-height: 116px;
+            padding: 11px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .wallet-package-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 107, 74, 0.16), transparent 38%),
+                radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.1), transparent 42%);
+            pointer-events: none;
+        }
+
+        .wallet-package-card.is-featured {
+            border-color: rgba(255, 107, 74, 0.52);
+            box-shadow: 0 14px 36px rgba(255, 107, 74, 0.12);
+        }
+
+        .wallet-package-card.is-vip {
+            grid-column: 1 / -1;
+            min-height: 112px;
+            border-color: rgba(74, 244, 197, 0.36);
+            background:
+                linear-gradient(135deg, rgba(74, 244, 197, 0.12), rgba(255, 107, 74, 0.08)),
+                var(--account-panel-soft);
+        }
+
+        .wallet-package-card.is-vip::before {
+            background:
+                radial-gradient(circle at 82% 20%, rgba(74, 244, 197, 0.16), transparent 34%),
+                radial-gradient(circle at 8% 90%, rgba(255, 107, 74, 0.16), transparent 42%);
+        }
+
+        .wallet-package-main,
+        .wallet-package-bottom {
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-package-main {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .wallet-package-title {
+            color: var(--account-text);
+            font-size: 0.82rem;
+            font-weight: 900;
+        }
+
+        .wallet-package-tag {
+            max-width: 126px;
+            border-radius: 999px;
+            padding: 3px 7px;
+            background: rgba(255, 107, 74, 0.12);
+            color: #e85b37;
+            font-size: 0.68rem;
+            font-weight: 900;
+            line-height: 1.2;
+            text-align: right;
+        }
+
+        .wallet-package-credits {
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-package-old {
+            color: var(--account-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .wallet-package-old.is-strike {
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+            text-decoration-color: rgba(217, 45, 32, 0.82);
+        }
+
+        .wallet-package-new {
+            margin-top: 3px;
+            color: var(--account-text);
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 1.38rem;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .wallet-package-new span {
+            margin-left: 4px;
+            color: var(--account-muted);
+            font-family: "Noto Sans SC", sans-serif;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .wallet-package-bottom {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .wallet-package-price {
+            color: var(--account-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .wallet-package-price strong {
+            color: #e85b37;
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .wallet-package-price s {
+            margin-right: 6px;
+            color: var(--account-muted);
+            text-decoration-thickness: 2px;
+            text-decoration-color: rgba(217, 45, 32, 0.82);
+        }
+
+        .wallet-package-pay {
+            min-height: 30px;
+            border-radius: 8px;
+            padding: 0 10px;
+            font-size: 0.74rem;
+            white-space: nowrap;
+        }
+
+        .wallet-package-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .wallet-vip-offer {
+            position: relative;
+            min-height: 102px;
+            border: 1px solid rgba(15, 159, 110, 0.28);
+            border-radius: 8px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 16px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 92% 18%, rgba(15, 159, 110, 0.14), transparent 34%),
+                linear-gradient(135deg, rgba(15, 159, 110, 0.1), rgba(255, 107, 74, 0.06)),
+                var(--account-panel-soft);
+        }
+
+        .wallet-vip-offer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(15, 159, 110, 0.12), transparent 44%);
+            pointer-events: none;
+        }
+
+        .wallet-vip-main,
+        .wallet-vip-action {
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-vip-main {
+            min-width: 0;
+            display: grid;
+            gap: 7px;
+        }
+
+        .wallet-vip-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .wallet-vip-title {
+            color: var(--account-text);
+            font-size: 1.02rem;
+            font-weight: 900;
+        }
+
+        .wallet-vip-desc {
+            color: var(--account-muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .wallet-vip-promo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .wallet-vip-stars {
+            color: #ffb84d;
+            font-size: 0.86rem;
+            letter-spacing: 0.02em;
+            line-height: 1;
+        }
+
+        .wallet-vip-hot {
+            color: #ff8a5f;
+            font-size: 0.78rem;
+            font-weight: 900;
+        }
+
+        .wallet-vip-price,
+        .wallet-credit-price {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .wallet-vip-price s,
+        .wallet-credit-price s {
+            color: var(--account-muted);
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-decoration-thickness: 2px;
+            text-decoration-color: rgba(217, 45, 32, 0.82);
+        }
+
+        .wallet-vip-price strong,
+        .wallet-credit-price strong {
+            color: #e85b37;
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 1.12rem;
+            font-weight: 900;
+        }
+
+        .wallet-vip-action {
+            display: grid;
+            gap: 8px;
+            justify-items: end;
+        }
+
+        .wallet-package-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .wallet-credit-card {
+            position: relative;
+            min-height: 78px;
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            padding: 11px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            background: var(--account-panel-soft);
+            overflow: hidden;
+        }
+
+        .wallet-credit-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 107, 74, 0.13), transparent 44%),
+                linear-gradient(90deg, rgba(15, 159, 110, 0.06), transparent 42%);
+            pointer-events: none;
+        }
+
+        .wallet-credit-main,
+        .wallet-credit-action {
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-credit-main {
+            min-width: 0;
+            display: grid;
+            gap: 6px;
+        }
+
+        .wallet-credit-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .wallet-credit-amount {
+            color: var(--account-text);
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 1.18rem;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .wallet-credit-amount span {
+            margin-left: 4px;
+            color: var(--account-muted);
+            font-family: "Noto Sans SC", sans-serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .wallet-credit-action {
+            display: grid;
+            gap: 6px;
+            justify-items: end;
+        }
+
+        .wallet-credit-card .wallet-package-pay {
+            min-width: 78px;
+            min-height: 30px;
+        }
+
+        .wallet-credit-card.is-wide {
+            grid-column: 1 / -1;
+        }
+
+        .wallet-deal-tag {
+            max-width: 112px;
+            border-radius: 999px;
+            padding: 3px 7px;
+            background: rgba(255, 107, 74, 0.12);
+            color: #e85b37;
+            font-size: 0.68rem;
+            font-weight: 900;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .wallet-pay-hint {
+            margin-top: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--account-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .wallet-pay-hint strong {
+            color: var(--account-text);
+        }
+
+        .wallet-redeem-form {
+            padding: 16px 18px 18px;
+        }
+
+        .wallet-form-title,
+        .wallet-section-title {
+            margin-bottom: 10px;
+            color: var(--account-text);
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .wallet-referral-panel .referral-card {
+            padding: 16px 18px 18px;
+        }
+
+        .wallet-referral-panel .referral-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .wallet-referral-panel .referral-stat:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .wallet-referral-panel .copy-row {
+            grid-template-columns: minmax(0, 1fr) 112px;
+        }
+
+        .wallet-referral-panel .copy-row input {
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 0.84rem;
+        }
+
+        .wallet-referral-panel .referral-fields .form-row {
+            gap: 8px;
+            grid-template-columns: minmax(0, 1fr) 112px;
+            align-items: end;
+        }
+
+        .wallet-referral-panel .referral-fields .form-row label {
+            grid-column: 1 / -1;
+        }
+
+        .wallet-referral-panel .referral-fields .form-row input {
+            min-width: 0;
+            font-family: "Outfit", "Noto Sans SC", sans-serif;
+            font-size: 0.84rem;
+        }
+
+        .wallet-tip-list {
+            margin: 0;
+            padding: 12px 14px 12px 28px;
+            color: var(--account-muted);
+            font-size: 0.82rem;
+            line-height: 1.7;
+        }
+
+        .wallet-tip-list li + li {
+            margin-top: 4px;
+        }
+
+        .wallet-record-panel {
+            margin-top: 14px;
+        }
+
+        .wallet-record-top {
+            align-items: flex-start;
+        }
+
+        .wallet-record-tabs {
+            min-height: 38px;
+            padding: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .wallet-record-tab {
+            min-height: 30px;
+            border: 0;
+            border-radius: 6px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            background: transparent;
+            color: var(--account-muted);
+            font-size: 0.82rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .wallet-record-tab.active {
+            color: var(--account-accent);
+            background: #ffffff;
+        }
+
+        .wallet-record-tab:focus-visible {
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.18);
+        }
+
+        .wallet-record-pane {
+            min-width: 0;
+        }
+
+        .wallet-record-pane[hidden] {
+            display: none;
+        }
+
+        .wallet-record-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .wallet-section-head {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 680px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #edf0f5;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 0.88rem;
+        }
+
+        .data-table th {
+            color: var(--account-muted);
+            background: #f8fafc;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .amount-plus,
+        .amount-minus {
+            font-family: "Outfit", sans-serif;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .amount-plus {
+            color: var(--account-success);
+        }
+
+        .amount-minus {
+            color: var(--account-danger);
+        }
+
+        .status-pill,
+        .type-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            border-radius: 999px;
+            padding: 0 9px;
+            background: #eef2f7;
+            color: #344054;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pill.completed {
+            background: #ecfdf3;
+            color: #027a48;
+        }
+
+        .status-pill.failed {
+            background: #fef3f2;
+            color: #b42318;
+        }
+
+        .status-pill.processing,
+        .status-pill.pending {
+            background: #fffaeb;
+            color: var(--account-warning);
+        }
+
+        .prompt-cell {
+            max-width: 360px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            min-height: 92px;
+            display: grid;
+            place-items: center;
+            color: var(--account-muted);
+            border: 1px dashed var(--account-border);
+            border-radius: 8px;
+            background: var(--account-panel-soft);
+            text-align: center;
+            padding: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+            max-width: 620px;
+        }
+
+        .form-row {
+            display: grid;
+            gap: 7px;
+        }
+
+        .form-row label {
+            color: #344054;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .form-row input,
+        .filter-select {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid var(--account-border);
+            border-radius: 8px;
+            padding: 0 12px;
+            background: #ffffff;
+            color: var(--account-text);
+            font: inherit;
+            outline: none;
+        }
+
+        .form-row input:focus,
+        .filter-select:focus {
+            border-color: #7aa7ff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .redeem-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            max-width: 680px;
+        }
+
+        .redeem-actions {
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .redeem-row input {
+            text-transform: uppercase;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            width: auto;
+            min-width: 150px;
+        }
+
+        .toast-line {
+            min-height: 20px;
+            margin-top: 10px;
+            color: var(--account-muted);
+            font-size: 0.84rem;
+        }
+
+        .toast-line.success {
+            color: var(--account-success);
+        }
+
+        .toast-line.error {
+            color: var(--account-danger);
+        }
+
+        .referral-note.success {
+            color: var(--account-success);
+        }
+
+        .referral-note.error {
+            color: var(--account-danger);
+        }
+
+        .account-info-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .info-row:last-child {
+            border-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--account-muted);
+            font-size: 0.84rem;
+        }
+
+        .info-value {
+            color: var(--account-text);
+            font-weight: 700;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 1180px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .content-grid,
+            .wallet-hero-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .account-app {
+                grid-template-columns: 1fr;
+            }
+
+            .account-sidebar {
+                position: static;
+                height: auto;
+                padding: 14px;
+            }
+
+            .nav-group {
+                grid-template-columns: repeat(4, minmax(128px, 1fr));
+                overflow-x: auto;
+                padding-bottom: 2px;
+            }
+
+            .nav-label,
+            .sidebar-profile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                grid-template-columns: 1fr;
+                margin-top: 0;
+            }
+
+            .tool-links {
+                grid-template-columns: repeat(4, minmax(104px, 1fr));
+                overflow-x: auto;
+                padding-bottom: 2px;
+            }
+
+            .account-workspace {
+                padding: 18px 14px 30px;
+            }
+
+            .workspace-topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .top-actions,
+            .redeem-row,
+            .copy-row,
+            .wallet-buy-box {
+                width: 100%;
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-buy-box {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .wallet-stat-grid,
+            .wallet-package-grid,
+            .wallet-referral-panel .referral-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-pay-hint,
+            .wallet-package-bottom,
+            .wallet-vip-offer,
+            .wallet-credit-card,
+            .wallet-offer-head {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .wallet-vip-action,
+            .wallet-credit-action {
+                justify-items: stretch;
+            }
+
+            .wallet-package-list {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-package-new {
+                font-size: 1.28rem;
+            }
+
+            .wallet-package-pay {
+                width: 100%;
+            }
+
+            .wallet-referral-panel .copy-row {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-referral-panel .referral-fields .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-card-head,
+            .wallet-section-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .referral-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .top-actions {
+                display: grid;
+            }
+
+            .account-btn {
+                width: 100%;
+            }
+
+            .balance-row,
+            .balance-meta,
+            .info-row {
+                align-items: flex-start;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .balance-status {
+                max-width: 100%;
+                text-align: left;
+            }
+
+            .redeem-actions {
+                width: 100%;
+            }
+
+            .info-value {
+                text-align: left;
+            }
+        }
+
+        /* 与主站保持一致的暗色玻璃风格 */
+        body {
+            background:
+                linear-gradient(180deg, rgba(10, 10, 15, 0.98) 0%, rgba(18, 18, 26, 0.98) 100%);
+            color: var(--text-primary);
+        }
+
+        .account-app {
+            position: relative;
+            background:
+                radial-gradient(circle at 85% 12%, rgba(255, 107, 74, 0.18), transparent 34%),
+                radial-gradient(circle at 8% 82%, rgba(74, 244, 197, 0.12), transparent 36%),
+                transparent;
+        }
+
+        .account-app::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.025;
+            mix-blend-mode: overlay;
+            z-index: 0;
+        }
+
+        .account-workspace {
+            position: relative;
+            z-index: 1;
+        }
+
+        .account-sidebar {
+            background: rgba(10, 10, 15, 0.78);
+            border-right: 1px solid var(--border);
+            box-shadow: 18px 0 50px rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        @media (min-width: 821px) {
+            .account-app::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 264px;
+                pointer-events: none;
+                z-index: 0;
+                background: rgba(10, 10, 15, 0.78);
+                border-right: 1px solid var(--border);
+                box-shadow: 18px 0 50px rgba(0, 0, 0, 0.24);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
+
+            .account-sidebar {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: transparent;
+                border-right: 0;
+                box-shadow: none;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+        }
+
+        .brand {
+            color: var(--text-primary);
+        }
+
+        .brand-mark {
+            border-radius: 0;
+        }
+
+        .brand span:last-child {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-profile {
+            border-color: var(--border);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+        }
+
+        .avatar {
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+        }
+
+        .profile-email,
+        .nav-label {
+            color: var(--text-muted);
+        }
+
+        .nav-item,
+        .sidebar-link,
+        .sidebar-logout {
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            transition: all 0.2s var(--ease-out);
+        }
+
+        .nav-item:hover,
+        .sidebar-link:hover,
+        .sidebar-logout:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 107, 74, 0.13);
+            color: var(--text-primary);
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+
+        .page-title,
+        .panel-title,
+        .balance-value,
+        .metric-value,
+        .quick-action strong,
+        .info-value {
+            color: var(--text-primary);
+        }
+
+        .page-subtitle,
+        .balance-label,
+        .metric-label,
+        .metric-help,
+        .table-note,
+        .balance-meta,
+        .quick-action span,
+        .empty-state,
+        .toast-line,
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .account-btn {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            transition: all 0.25s var(--ease-out);
+        }
+
+        .account-btn:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            transform: translateY(-1px);
+        }
+
+        .account-btn.primary {
+            border-color: transparent;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            box-shadow: 0 8px 28px rgba(255, 107, 74, 0.24);
+        }
+
+        .account-btn.ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .account-btn.ghost:hover {
+            color: var(--text-primary);
+        }
+
+        .panel,
+        .metric-card,
+        .balance-panel {
+            background: rgba(18, 18, 26, 0.72);
+            border-color: var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .balance-panel {
+            background:
+                linear-gradient(135deg, rgba(255, 107, 74, 0.14), rgba(74, 244, 197, 0.06)),
+                rgba(18, 18, 26, 0.78);
+        }
+
+        .wallet-card-head {
+            border-bottom-color: var(--border);
+        }
+
+        .wallet-icon {
+            background: rgba(74, 244, 197, 0.12);
+            color: var(--accent);
+        }
+
+        .wallet-head-text p,
+        .wallet-user-pill,
+        .wallet-buy-copy span,
+        .wallet-tip-list,
+        .wallet-record-tab {
+            color: var(--text-muted);
+        }
+
+        .wallet-stat-box,
+        .wallet-buy-box,
+        .wallet-package-card,
+        .wallet-pay-hint,
+        .wallet-record-tabs,
+        .wallet-tip-list {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .wallet-stat-value,
+        .wallet-buy-copy,
+        .wallet-offer-title,
+        .wallet-package-title,
+        .wallet-package-new,
+        .wallet-pay-hint strong,
+        .wallet-form-title,
+        .wallet-section-title {
+            color: var(--text-primary);
+        }
+
+        .wallet-offer-subtitle,
+        .wallet-package-old,
+        .wallet-package-new span,
+        .wallet-package-price,
+        .wallet-pay-hint {
+            color: var(--text-muted);
+        }
+
+        .wallet-pay-pill {
+            background: rgba(74, 244, 197, 0.12);
+            color: var(--accent);
+        }
+
+        .wallet-package-card::before {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 107, 74, 0.18), transparent 38%),
+                radial-gradient(circle at 0% 100%, rgba(74, 244, 197, 0.11), transparent 42%);
+        }
+
+        .wallet-package-card.is-featured {
+            border-color: rgba(255, 107, 74, 0.58);
+            box-shadow: 0 14px 42px rgba(255, 107, 74, 0.18);
+        }
+
+        .wallet-package-card.is-vip {
+            border-color: rgba(74, 244, 197, 0.42);
+            background:
+                linear-gradient(135deg, rgba(74, 244, 197, 0.12), rgba(255, 107, 74, 0.08)),
+                rgba(255, 255, 255, 0.035);
+        }
+
+        .wallet-vip-offer {
+            border-color: rgba(74, 244, 197, 0.42);
+            background:
+                radial-gradient(circle at 92% 18%, rgba(74, 244, 197, 0.15), transparent 34%),
+                linear-gradient(135deg, rgba(74, 244, 197, 0.12), rgba(255, 107, 74, 0.08)),
+                rgba(255, 255, 255, 0.035);
+        }
+
+        .wallet-package-tag {
+            background: rgba(255, 107, 74, 0.16);
+            color: var(--primary-light);
+        }
+
+        .wallet-deal-tag {
+            background: rgba(255, 107, 74, 0.16);
+            color: var(--primary-light);
+        }
+
+        .wallet-package-card.is-vip .wallet-package-tag {
+            background: rgba(74, 244, 197, 0.14);
+            color: var(--accent);
+        }
+
+        .wallet-vip-offer .wallet-deal-tag {
+            background: rgba(74, 244, 197, 0.14);
+            color: var(--accent);
+        }
+
+        .wallet-package-old {
+            text-decoration-color: rgba(255, 107, 74, 0.92);
+        }
+
+        .wallet-package-price strong {
+            color: var(--primary-light);
+        }
+
+        .wallet-package-card.is-vip .wallet-package-new,
+        .wallet-package-card.is-vip .wallet-package-price strong,
+        .wallet-vip-title,
+        .wallet-vip-price strong {
+            color: var(--accent);
+        }
+
+        .wallet-credit-card {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .wallet-credit-card::before {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 107, 74, 0.15), transparent 42%),
+                linear-gradient(90deg, rgba(74, 244, 197, 0.06), transparent 42%);
+        }
+
+        .wallet-credit-amount {
+            color: var(--text-primary);
+        }
+
+        .wallet-vip-desc,
+        .wallet-vip-hot,
+        .wallet-credit-amount span,
+        .wallet-vip-price s,
+        .wallet-credit-price s {
+            color: var(--text-muted);
+        }
+
+        .wallet-vip-stars {
+            color: #ffb84d;
+        }
+
+        .wallet-vip-hot {
+            color: var(--primary-light);
+        }
+
+        .wallet-record-tab.active {
+            color: var(--primary-light);
+            background: rgba(255, 107, 74, 0.12);
+        }
+
+        .balance-status {
+            background: rgba(255, 107, 74, 0.14);
+            color: var(--primary-light);
+        }
+
+        .usage-progress {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .usage-progress span {
+            background: var(--gradient-primary);
+        }
+
+        .quick-action {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            transition: all 0.22s var(--ease-out);
+        }
+
+        .quick-action:hover {
+            border-color: rgba(255, 107, 74, 0.35);
+            background: rgba(255, 107, 74, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .referral-stat {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .referral-stat strong {
+            color: var(--text-primary);
+        }
+
+        .copy-row input {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.045);
+            color: var(--text-primary);
+        }
+
+        .copy-row input.is-empty {
+            color: var(--text-muted);
+        }
+
+        .referral-note {
+            color: var(--text-muted);
+        }
+
+        body[data-active-view="credits"] .account-workspace {
+            padding-top: 18px;
+        }
+
+        body[data-active-view="credits"] .workspace-topbar {
+            min-height: 48px;
+            margin-bottom: 8px;
+        }
+
+        body[data-active-view="credits"] .page-title {
+            font-size: 1.34rem;
+            line-height: 1.15;
+        }
+
+        body[data-active-view="credits"] .page-subtitle {
+            margin-top: 3px;
+            font-size: 0.84rem;
+        }
+
+        body[data-active-view="credits"] #view-credits.active {
+            margin-top: 0;
+        }
+
+        body[data-active-view="credits"] .wallet-hero-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            grid-template-columns: minmax(540px, 1fr) minmax(340px, 0.62fr);
+            gap: 12px;
+        }
+
+        body[data-active-view="credits"] .wallet-recharge-panel,
+        body[data-active-view="credits"] .wallet-referral-panel {
+            border-radius: 14px;
+        }
+
+        body[data-active-view="credits"] .wallet-card-head {
+            min-height: 62px;
+            padding: 14px 16px;
+            gap: 10px;
+        }
+
+        body[data-active-view="credits"] .wallet-head-copy {
+            gap: 10px;
+        }
+
+        body[data-active-view="credits"] .wallet-icon {
+            width: 34px;
+            height: 34px;
+        }
+
+        body[data-active-view="credits"] .wallet-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        body[data-active-view="credits"] .wallet-head-text p {
+            margin-top: 2px;
+            font-size: 0.78rem;
+        }
+
+        body[data-active-view="credits"] .wallet-stat-grid {
+            padding: 12px 16px 0;
+            gap: 8px;
+        }
+
+        body[data-active-view="credits"] .wallet-stat-box,
+        body[data-active-view="credits"] .wallet-referral-panel .referral-stat {
+            min-height: 58px;
+            padding: 10px 12px;
+        }
+
+        body[data-active-view="credits"] .wallet-stat-value,
+        body[data-active-view="credits"] .wallet-referral-panel .referral-stat strong {
+            margin-top: 5px;
+            font-size: 1.18rem;
+        }
+
+        body[data-active-view="credits"] .wallet-recharge-offer {
+            margin: 12px 16px 0;
+        }
+
+        body[data-active-view="credits"] .wallet-offer-head {
+            margin-bottom: 8px;
+        }
+
+        body[data-active-view="credits"] .wallet-pay-pill {
+            min-height: 28px;
+            padding: 0 10px;
+            font-size: 0.72rem;
+        }
+
+        body[data-active-view="credits"] .wallet-vip-offer {
+            min-height: 86px;
+            padding: 12px;
+            gap: 12px;
+        }
+
+        body[data-active-view="credits"] .wallet-vip-main {
+            gap: 5px;
+        }
+
+        body[data-active-view="credits"] .wallet-vip-title {
+            font-size: 0.94rem;
+        }
+
+        body[data-active-view="credits"] .wallet-vip-price strong,
+        body[data-active-view="credits"] .wallet-credit-price strong {
+            font-size: 1rem;
+        }
+
+        body[data-active-view="credits"] .wallet-package-list {
+            gap: 7px;
+        }
+
+        body[data-active-view="credits"] .wallet-credit-card {
+            min-height: 66px;
+            padding: 9px 10px;
+            gap: 8px;
+        }
+
+        body[data-active-view="credits"] .wallet-credit-main {
+            gap: 4px;
+        }
+
+        body[data-active-view="credits"] .wallet-credit-amount {
+            font-size: 1.02rem;
+        }
+
+        body[data-active-view="credits"] .wallet-deal-tag {
+            padding: 2px 7px;
+            font-size: 0.64rem;
+        }
+
+        body[data-active-view="credits"] .wallet-package-pay {
+            min-height: 28px;
+            padding: 0 9px;
+            font-size: 0.72rem;
+        }
+
+        body[data-active-view="credits"] .wallet-redeem-form,
+        body[data-active-view="credits"] .wallet-referral-panel .referral-card {
+            padding: 14px 16px 16px;
+        }
+
+        body[data-active-view="credits"] .redeem-row {
+            max-width: none;
+            grid-template-columns: minmax(0, 1fr) 128px;
+        }
+
+        body[data-active-view="credits"] .wallet-referral-panel .referral-card {
+            gap: 10px;
+        }
+
+        body[data-active-view="credits"] .wallet-referral-panel .referral-stats {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        body[data-active-view="credits"] .wallet-referral-panel .referral-stat:first-child {
+            grid-column: auto;
+        }
+
+        body[data-active-view="credits"] .wallet-referral-panel .referral-fields {
+            gap: 8px;
+        }
+
+        body[data-active-view="credits"] .wallet-referral-panel .referral-fields .form-row {
+            gap: 7px;
+            grid-template-columns: minmax(0, 1fr) 104px;
+        }
+
+        body[data-active-view="credits"] .form-row input,
+        body[data-active-view="credits"] .filter-select {
+            min-height: 38px;
+        }
+
+        body[data-active-view="credits"] .wallet-tip-list {
+            padding: 10px 12px 10px 26px;
+            font-size: 0.78rem;
+            line-height: 1.58;
+        }
+
+        body[data-active-view="credits"] .wallet-record-panel {
+            max-width: 1320px;
+            margin: 12px auto 0;
+        }
+
+        @media (max-width: 1180px) {
+            body[data-active-view="credits"] #view-credits.active {
+                margin-top: 0;
+            }
+
+            body[data-active-view="credits"] .wallet-hero-grid,
+            body[data-active-view="credits"] .wallet-record-panel {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 620px) {
+            body[data-active-view="credits"] .account-workspace {
+                padding-top: 16px;
+            }
+
+            body[data-active-view="credits"] .workspace-topbar {
+                margin-bottom: 12px;
+            }
+
+            body[data-active-view="credits"] .redeem-row,
+            body[data-active-view="credits"] .wallet-referral-panel .referral-fields .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            body[data-active-view="credits"] .wallet-referral-panel .referral-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-wrap {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: var(--radius-md);
+        }
+
+        .data-table th,
+        .data-table td {
+            border-bottom-color: var(--border);
+            color: var(--text-secondary);
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+        }
+
+        .data-table td strong {
+            color: var(--text-primary);
+        }
+
+        .amount-plus {
+            color: var(--accent);
+        }
+
+        .amount-minus {
+            color: var(--primary-light);
+        }
+
+        .status-pill,
+        .type-pill {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-secondary);
+        }
+
+        .status-pill.completed {
+            background: rgba(74, 244, 197, 0.12);
+            color: var(--accent);
+        }
+
+        .status-pill.failed {
+            background: rgba(255, 107, 74, 0.13);
+            color: var(--primary-light);
+        }
+
+        .status-pill.processing,
+        .status-pill.pending {
+            background: rgba(255, 159, 107, 0.13);
+            color: var(--primary-light);
+        }
+
+        .empty-state {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .form-row label {
+            color: var(--text-secondary);
+        }
+
+        .form-row input,
+        .filter-select {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.045);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .form-row input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-row input:focus,
+        .filter-select:focus {
+            border-color: rgba(255, 107, 74, 0.48);
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.1);
+        }
+
+        .filter-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .toast-line.success {
+            color: var(--accent);
+        }
+
+        .toast-line.error {
+            color: var(--primary-light);
+        }
+
+        .referral-note.success {
+            color: var(--accent);
+        }
+
+        .referral-note.error {
+            color: var(--primary-light);
+        }
+
+        .info-row {
+            border-bottom-color: var(--border);
+        }
+
+        @media (max-width: 820px) {
+            .account-sidebar {
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+        }
+
+        /* 用户中心暗色模式沿用原先的暖色玻璃质感，避免被全局主题层二次洗成蓝灰色。 */
+        html[data-theme="dark"] body {
+            background:
+                linear-gradient(180deg, rgba(10, 10, 15, 0.98) 0%, rgba(18, 18, 26, 0.98) 100%);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .account-app {
+            --account-bg: #0A0A0F;
+            --account-sidebar: #0A0A0F;
+            --account-sidebar-soft: #12121A;
+            --account-text: #FFFFFF;
+            --account-muted: rgba(255, 255, 255, 0.5);
+            --account-border: rgba(255, 255, 255, 0.08);
+            --account-panel: rgba(18, 18, 26, 0.72);
+            --account-panel-soft: rgba(255, 255, 255, 0.035);
+            --account-accent: #4AF4C5;
+            --account-accent-soft: rgba(74, 244, 197, 0.12);
+            --account-success: #4AF4C5;
+            --account-danger: #FF9F6B;
+            --account-warning: #FF9F6B;
+            background:
+                radial-gradient(circle at 85% 12%, rgba(255, 107, 74, 0.18), transparent 34%),
+                radial-gradient(circle at 8% 82%, rgba(74, 244, 197, 0.12), transparent 36%),
+                transparent;
+        }
+
+        html[data-theme="dark"] .account-app::before,
+        html[data-theme="dark"] .account-app::after {
+            display: block;
+        }
+
+        html[data-theme="dark"] .account-app .account-sidebar {
+            background: rgba(10, 10, 15, 0.78);
+            border-right: 1px solid var(--border);
+            box-shadow: 18px 0 50px rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        html[data-theme="dark"] .account-app .account-workspace {
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .account-app .brand span:last-child {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .account-app .sidebar-profile {
+            border-color: var(--border);
+            background: var(--bg-card);
+            box-shadow: none;
+        }
+
+        html[data-theme="dark"] .account-app .avatar {
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+        }
+
+        html[data-theme="dark"] .account-app .profile-name,
+        html[data-theme="dark"] .account-app .page-title,
+        html[data-theme="dark"] .account-app .panel-title,
+        html[data-theme="dark"] .account-app .balance-value,
+        html[data-theme="dark"] .account-app .metric-value,
+        html[data-theme="dark"] .account-app .quick-action strong,
+        html[data-theme="dark"] .account-app .info-value,
+        html[data-theme="dark"] .account-app .wallet-stat-value,
+        html[data-theme="dark"] .account-app .wallet-offer-title,
+        html[data-theme="dark"] .account-app .wallet-form-title,
+        html[data-theme="dark"] .account-app .wallet-section-title,
+        html[data-theme="dark"] .account-app .wallet-credit-amount,
+        html[data-theme="dark"] .account-app .wallet-vip-title {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .account-app .profile-email,
+        html[data-theme="dark"] .account-app .nav-label,
+        html[data-theme="dark"] .account-app .page-subtitle,
+        html[data-theme="dark"] .account-app .balance-label,
+        html[data-theme="dark"] .account-app .metric-label,
+        html[data-theme="dark"] .account-app .metric-help,
+        html[data-theme="dark"] .account-app .table-note,
+        html[data-theme="dark"] .account-app .balance-meta,
+        html[data-theme="dark"] .account-app .quick-action span,
+        html[data-theme="dark"] .account-app .empty-state,
+        html[data-theme="dark"] .account-app .toast-line,
+        html[data-theme="dark"] .account-app .wallet-head-text p,
+        html[data-theme="dark"] .account-app .wallet-user-pill,
+        html[data-theme="dark"] .account-app .wallet-offer-subtitle,
+        html[data-theme="dark"] .account-app .wallet-credit-amount span,
+        html[data-theme="dark"] .account-app .wallet-vip-desc,
+        html[data-theme="dark"] .account-app .wallet-vip-price s,
+        html[data-theme="dark"] .account-app .wallet-credit-price s,
+        html[data-theme="dark"] .account-app .wallet-tip-list,
+        html[data-theme="dark"] .account-app .wallet-record-tab {
+            color: var(--text-muted);
+        }
+
+        html[data-theme="dark"] .account-app .nav-item,
+        html[data-theme="dark"] .account-app .sidebar-link,
+        html[data-theme="dark"] .account-app .sidebar-logout {
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .account-app .nav-item:hover,
+        html[data-theme="dark"] .account-app .sidebar-link:hover,
+        html[data-theme="dark"] .account-app .sidebar-logout:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .account-app .nav-item.active {
+            background: rgba(255, 107, 74, 0.13);
+            color: var(--text-primary);
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+
+        html[data-theme="dark"] .account-app .panel,
+        html[data-theme="dark"] .account-app .metric-card,
+        html[data-theme="dark"] .account-app .balance-panel {
+            border-radius: var(--radius-lg);
+            border-color: var(--border);
+            background: rgba(18, 18, 26, 0.72);
+            color: var(--text-primary);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        html[data-theme="dark"] .account-app .balance-panel {
+            background:
+                linear-gradient(135deg, rgba(255, 107, 74, 0.14), rgba(74, 244, 197, 0.06)),
+                rgba(18, 18, 26, 0.78);
+        }
+
+        html[data-theme="dark"] .account-app .account-btn {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            box-shadow: none;
+        }
+
+        html[data-theme="dark"] .account-app .account-btn:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        html[data-theme="dark"] .account-app .account-btn.primary {
+            border-color: transparent;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            box-shadow: 0 8px 28px rgba(255, 107, 74, 0.24);
+        }
+
+        html[data-theme="dark"] .account-app .account-btn.ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-icon,
+        html[data-theme="dark"] .account-app .wallet-pay-pill,
+        html[data-theme="dark"] .account-app .balance-status {
+            background: rgba(74, 244, 197, 0.12);
+            color: var(--accent);
+        }
+
+        html[data-theme="dark"] .account-app .quick-action,
+        html[data-theme="dark"] .account-app .referral-stat,
+        html[data-theme="dark"] .account-app .wallet-stat-box,
+        html[data-theme="dark"] .account-app .wallet-buy-box,
+        html[data-theme="dark"] .account-app .wallet-pay-hint,
+        html[data-theme="dark"] .account-app .wallet-record-tabs,
+        html[data-theme="dark"] .account-app .wallet-tip-list {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-card-head {
+            border-bottom-color: var(--border);
+            background: transparent;
+        }
+
+        html[data-theme="dark"] .account-app .wallet-vip-offer {
+            border-color: rgba(74, 244, 197, 0.42);
+            background:
+                radial-gradient(circle at 92% 18%, rgba(74, 244, 197, 0.15), transparent 34%),
+                linear-gradient(135deg, rgba(74, 244, 197, 0.12), rgba(255, 107, 74, 0.08)),
+                rgba(255, 255, 255, 0.035);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-credit-card {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-vip-offer::before,
+        html[data-theme="dark"] .account-app .wallet-credit-card::before,
+        html[data-theme="dark"] .account-app .wallet-package-card::before {
+            display: block;
+        }
+
+        html[data-theme="dark"] .account-app .wallet-vip-hot,
+        html[data-theme="dark"] .account-app .wallet-vip-price strong,
+        html[data-theme="dark"] .account-app .wallet-credit-price strong,
+        html[data-theme="dark"] .account-app .wallet-deal-tag {
+            color: var(--primary-light);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-vip-offer .wallet-deal-tag {
+            color: var(--accent);
+        }
+
+        html[data-theme="dark"] .account-app .wallet-record-tab.active {
+            background: rgba(255, 107, 74, 0.12);
+            color: var(--primary-light);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body data-active-view="overview">
+    <script>
+        document.body.dataset.activeView = document.documentElement.dataset.initialView || 'overview';
+    </script>
+    <div class="account-app">
+        <aside class="account-sidebar">
+            <a href="index.html" class="brand">
+                <span class="brand-mark">
+                    <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                </span>
+                <span id="accountBrandName">AI Designer</span>
+            </a>
+
+            <div class="sidebar-profile">
+                <div class="avatar" id="sidebarAvatar">U</div>
+                <div>
+                    <div class="profile-name" id="sidebarName">用户</div>
+                    <div class="profile-email" id="sidebarEmail">正在加载...</div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-label">账户</div>
+                <nav class="nav-group">
+                    <button class="nav-item active" type="button" data-view="overview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span class="nav-copy"><strong>总览</strong></span>
+                    </button>
+                    <button class="nav-item" type="button" data-view="credits">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19H20"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16V13"/></svg>
+                        <span class="nav-copy"><strong>钱包</strong></span>
+                    </button>
+                    <button class="nav-item" type="button" data-view="tasks">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h6"/><path d="M7 16h8"/></svg>
+                        <span class="nav-copy"><strong>生成记录</strong></span>
+                    </button>
+                    <button class="nav-item" type="button" data-view="settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7A4 4 0 0 1 16 7V11"/></svg>
+                        <span class="nav-copy"><strong>账号设置</strong></span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="nav-label">创作</div>
+                <div class="tool-links">
+                    <a class="sidebar-link tool-link" href="image.html">PPT</a>
+                    <a class="sidebar-link tool-link" href="image.html">图片</a>
+                    <a class="sidebar-link tool-link" href="image.html">视频</a>
+                    <a class="sidebar-link tool-link" href="dashboard.html">控制台</a>
+                </div>
+                <a class="sidebar-link" href="usage.html">使用指南</a>
+                <button class="sidebar-logout" type="button" onclick="logout()">退出登录</button>
+            </div>
+        </aside>
+
+        <main class="account-workspace">
+            <header class="workspace-topbar">
+                <div>
+                    <h1 class="page-title" id="viewTitle">概览</h1>
+                    <p class="page-subtitle" id="viewSubtitle">账户额度、近期记录和常用入口</p>
+                </div>
+                <div class="top-actions">
+                    <a class="account-btn ghost" href="index.html">返回首页</a>
+                    <a class="account-btn primary" href="dashboard.html">去创作</a>
+                </div>
+            </header>
+
+            <section class="view active" id="view-overview">
+                <div class="summary-grid">
+                    <div class="balance-panel">
+                        <div class="balance-row">
+                            <div>
+                                <div class="balance-label">通用额度余额</div>
+                                <div class="balance-value" id="creditRemaining">--</div>
+                            </div>
+                            <div class="balance-status" id="creditStatus">加载中</div>
+                        </div>
+                        <div>
+                            <div class="usage-progress"><span id="creditProgress"></span></div>
+                            <div class="balance-meta">
+                                <span>累计获得 <strong id="creditTotal">--</strong></span>
+                                <span>累计使用 <strong id="creditUsed">--</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">作品任务</div>
+                        <div class="metric-value" id="taskTotal">--</div>
+                        <div class="metric-help">全部生成任务</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">兑换次数</div>
+                        <div class="metric-value" id="redeemCount">--</div>
+                        <div class="metric-help">最近记录统计</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">本月使用</div>
+                        <div class="metric-value" id="monthUsed">--</div>
+                        <div class="metric-help">按额度流水统计</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">保存空间</div>
+                        <div class="metric-value compact" id="storageStatus">--</div>
+                        <div class="metric-help" id="storageHelp">普通用户图片 10 张，PPT 3 套</div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">最近额度流水</h2>
+                                <button class="account-btn ghost" type="button" data-jump="credits">查看全部</button>
+                            </div>
+                            <div id="recentLedger"></div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">快捷入口</h2>
+                            </div>
+                            <div class="quick-actions">
+                                <button class="quick-action" type="button" data-jump="credits">
+                                    <strong>钱包充值</strong>
+                                    <span>输入兑换码</span>
+                                </button>
+                                <button class="quick-action" type="button" data-jump="credits">
+                                    <strong>钱包流水</strong>
+                                    <span>查看充值和消耗</span>
+                                </button>
+                                <a class="quick-action" href="image.html">
+                                    <strong>开始创作</strong>
+                                    <span>PPT、图片、视频工具</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">最近任务</h2>
+                        </div>
+                        <div id="recentTasks"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" id="view-credits">
+                <div class="wallet-hero-grid">
+                    <div class="panel wallet-recharge-panel">
+                        <div class="wallet-card-head">
+                            <div class="wallet-head-copy">
+                                <span class="wallet-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7V6a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h14v10H5a3 3 0 0 1-3-3V7"/><path d="M16 14h.01"/></svg>
+                                </span>
+                                <div class="wallet-head-text">
+                                    <h2 class="panel-title">钱包充值</h2>
+                                    <p>选择活动额度后直接跳转支付宝付款，支付成功后自动到账</p>
+                                </div>
+                            </div>
+                            <div class="wallet-user-pill" id="walletUserLabel">--</div>
+                        </div>
+                        <div class="wallet-stat-grid">
+                            <div class="wallet-stat-box">
+                                <div class="metric-label">当前余额</div>
+                                <div class="wallet-stat-value" id="walletCreditRemaining">--</div>
+                            </div>
+                            <div class="wallet-stat-box">
+                                <div class="metric-label">历史消耗</div>
+                                <div class="wallet-stat-value" id="walletCreditUsed">--</div>
+                            </div>
+                        </div>
+                        <div class="wallet-recharge-offer">
+	                            <div class="wallet-offer-head">
+	                                <div>
+	                                    <div class="wallet-offer-title">活动充值额度</div>
+	                                </div>
+	                                <span class="wallet-pay-pill">本地版已关闭支付</span>
+	                            </div>
+	                            <div class="wallet-package-grid" id="walletRechargePackages"></div>
+	                        </div>
+                        <form id="redeemForm" class="wallet-redeem-form">
+                            <div class="wallet-form-title">使用兑换码充值</div>
+                            <div class="redeem-row">
+                                <div class="form-row">
+                                    <label for="redeemCode">兑换码</label>
+                                    <input id="redeemCode" placeholder="AM-XXXXXX-XXXXXX" autocomplete="off">
+                                </div>
+                                <div class="redeem-actions">
+                                    <button class="account-btn primary" type="submit">立即兑换</button>
+                                </div>
+                            </div>
+                            <div class="toast-line" id="redeemStatus"></div>
+                        </form>
+                    </div>
+
+                    <div class="panel wallet-referral-panel">
+                        <div class="wallet-card-head">
+                            <div class="wallet-head-copy">
+                                <span class="wallet-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </span>
+                                <div class="wallet-head-text">
+                                    <h2 class="panel-title">邀请奖励</h2>
+                                    <p>邀请好友注册并消费可获得返利</p>
+                                </div>
+                            </div>
+                            <button class="account-btn ghost" type="button" onclick="copyReferralLink()">复制链接</button>
+                        </div>
+                        <div class="referral-card">
+                            <div class="referral-stats">
+                                <div class="referral-stat">
+                                    <span class="metric-label">邀请人数</span>
+                                    <strong id="walletReferralInvitedCount">--</strong>
+                                </div>
+                                <div class="referral-stat">
+                                    <span class="metric-label">累计返利</span>
+                                    <strong id="walletReferralRewardTotal">--</strong>
+                                </div>
+                                <div class="referral-stat">
+                                    <span class="metric-label">返利次数</span>
+                                    <strong id="walletReferralRewardCount">--</strong>
+                                </div>
+                            </div>
+                            <div class="referral-fields">
+                                <div class="form-row">
+                                    <label for="walletReferralInviteCode">我的邀请码</label>
+                                    <input id="walletReferralInviteCode" readonly value="--">
+                                    <button class="account-btn" type="button" onclick="copyReferralCode()">复制邀请码</button>
+                                </div>
+                                <div class="form-row">
+                                    <label for="walletReferralInviteLink">邀请链接</label>
+                                    <input id="walletReferralInviteLink" readonly value="--">
+                                    <button class="account-btn" type="button" onclick="copyReferralLink()">复制链接</button>
+                                </div>
+                            </div>
+                            <div class="referral-note" id="walletReferralCopyStatus">
+                                新用户通过你的邀请码注册可获得 1 天 VIP；TA 的第一笔成功消费返利 5%，之后返利 2%。
+                            </div>
+                            <ul class="wallet-tip-list">
+                                <li>邀请好友注册后，新用户可获得 1 天 VIP 奖励</li>
+                                <li>好友首次成功消费返利 5%，之后每笔成功消费返利 2%</li>
+                                <li>返利会自动进入你的账户余额</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel wallet-record-panel">
+                    <div class="panel-header wallet-record-top">
+                        <div>
+                            <h2 class="panel-title">钱包记录</h2>
+                            <p class="page-subtitle">查看兑换、返利和额度消耗明细</p>
+                        </div>
+                        <div class="wallet-record-tabs" role="tablist" aria-label="钱包记录类型">
+                            <button class="wallet-record-tab active" type="button" role="tab" aria-selected="true" aria-controls="walletLedgerPane" data-wallet-record-tab="ledger">额度流水</button>
+                            <button class="wallet-record-tab" type="button" role="tab" aria-selected="false" aria-controls="walletRedeemPane" data-wallet-record-tab="redeem">兑换记录</button>
+                        </div>
+                    </div>
+                    <div class="wallet-record-grid">
+                        <div class="wallet-record-pane" id="walletLedgerPane" role="tabpanel" data-wallet-record-pane="ledger">
+                            <div class="wallet-section-head">
+                                <div class="wallet-section-title">额度使用记录</div>
+                                <div class="filter-row">
+                                    <select class="filter-select" id="ledgerDirectionFilter">
+                                        <option value="">全部变动</option>
+                                        <option value="debit">只看消耗</option>
+                                        <option value="credit">只看充值</option>
+                                    </select>
+                                    <select class="filter-select" id="ledgerSourceFilter">
+                                        <option value="">全部类型</option>
+                                        <option value="ppt">PPT</option>
+                                        <option value="image">图片</option>
+                                        <option value="video">视频</option>
+                                        <option value="chat">对话</option>
+                                        <option value="registration_bonus">注册送</option>
+                                        <option value="redemption">兑换码</option>
+                                        <option value="referral_reward">邀请返利</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="ledgerTable"></div>
+                        </div>
+                        <div class="wallet-record-pane" id="walletRedeemPane" role="tabpanel" data-wallet-record-pane="redeem" hidden>
+                            <div class="wallet-section-head">
+                                <div class="wallet-section-title">兑换记录</div>
+                            </div>
+                            <div id="redeemHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" id="view-tasks">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">生成记录</h2>
+                        <div class="filter-row">
+                            <a class="account-btn ghost" href="image.html">PPT</a>
+                            <a class="account-btn ghost" href="image.html">图片</a>
+                            <a class="account-btn ghost" href="image.html">视频</a>
+                        </div>
+                    </div>
+                    <div id="taskTable"></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-settings">
+                <div class="content-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">账号资料</h2>
+                        </div>
+                        <form class="form-grid" id="profileForm">
+                            <div class="form-row">
+                                <label for="usernameInput">用户名</label>
+                                <input id="usernameInput" placeholder="输入新的用户名">
+                            </div>
+                            <div class="form-row">
+                                <label for="avatarInput">头像 URL</label>
+                                <input id="avatarInput" placeholder="可选，粘贴图片地址">
+                            </div>
+                            <div>
+                                <button class="account-btn primary" type="submit">保存资料</button>
+                            </div>
+                            <div class="toast-line" id="profileStatus"></div>
+                        </form>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">账户信息</h2>
+                        </div>
+                        <div class="account-info-list">
+                            <div class="info-row">
+                                <span class="info-label">邮箱</span>
+                                <span class="info-value" id="infoEmail">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">身份</span>
+                                <span class="info-value" id="infoRole">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">注册时间</span>
+                                <span class="info-value" id="infoCreatedAt">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">修改密码</h2>
+                        </div>
+                        <form class="form-grid" id="passwordForm">
+                            <div class="form-row">
+                                <label for="currentPassword">当前密码</label>
+                                <input id="currentPassword" type="password" autocomplete="current-password">
+                            </div>
+                            <div class="form-row">
+                                <label for="newPassword">新密码</label>
+                                <input id="newPassword" type="password" autocomplete="new-password">
+                            </div>
+                            <div>
+                                <button class="account-btn primary" type="submit">更新密码</button>
+                            </div>
+                            <div class="toast-line" id="passwordStatus"></div>
+                        </form>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">登录状态</h2>
+                        </div>
+                        <div class="account-info-list">
+                            <div class="info-row">
+                                <span class="info-label">当前账户</span>
+                                <span class="info-value" id="securityEmail">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">操作</span>
+                                <button class="account-btn" type="button" onclick="logout()">退出登录</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API = '/api';
+        let token = localStorage.getItem('aimaster_token');
+        let currentUser = JSON.parse(localStorage.getItem('aimaster_user') || 'null');
+
+        const state = {
+            quota: null,
+            storage: null,
+            stats: null,
+            creditHistory: [],
+            redeemHistory: [],
+            walletRecordTab: 'ledger',
+            tasks: [],
+            referral: null,
+            site: {
+                rechargePackages: [],
+                payment: {
+                    mode: 'card_link',
+                    alipayEnabled: false,
+                    purchaseCardUrl: ''
+                }
+            }
+        };
+
+        const DEFAULT_RECHARGE_PACKAGES = [
+            { id: 'vip-monthly', type: 'vip', title: '开通 VIP', benefitText: '会员期间所有额度 8 折使用', originalPrice: '98', price: '68', tag: '五一特惠', vipDays: 30 },
+            { id: 'credits-20000', type: 'credits', title: '20000 积分', credits: 20000, originalPrice: '648', price: '388.8', tag: '五一特惠' },
+            { id: 'credits-3800', type: 'credits', title: '3800 积分', credits: 3800, originalPrice: '128', price: '76.8', tag: '五一特惠' },
+            { id: 'credits-850', type: 'credits', title: '850 积分', credits: 850, originalPrice: '29.9', price: '17.9', tag: '五一特惠' },
+            { id: 'credits-500', type: 'credits', title: '500 积分', credits: 500, originalPrice: '19.9', price: '11.9', tag: '五一特惠' },
+            { id: 'credits-100', type: 'credits', title: '100 积分', credits: 100, originalPrice: '4.99', price: '2.99', tag: '五一特惠' }
+        ];
+
+        function formatPackageCredits(value) {
+            const number = Number(value || 0);
+            if (!Number.isFinite(number)) return '0';
+            return number.toLocaleString('zh-CN');
+        }
+
+        function formatPackagePrice(value) {
+            const text = String(value || '').trim();
+            if (!text) return '活动价';
+            return /^[¥￥]/.test(text) ? text : `￥${text}`;
+        }
+
+        function packagePriceHtml(item) {
+            const priceText = formatPackagePrice(item.price);
+            const oldPriceText = item.originalPrice ? formatPackagePrice(item.originalPrice) : '';
+            return `${oldPriceText ? `<s>${escapeHtml(oldPriceText)}</s>` : ''}<strong>${escapeHtml(priceText)}</strong>`;
+        }
+
+        function normalizeRechargePackages(packages) {
+            const source = Array.isArray(packages) && packages.length ? packages : DEFAULT_RECHARGE_PACKAGES;
+            const normalized = source.map((item, index) => {
+                const type = String(item.type || item.kind || '').trim().toLowerCase() === 'vip' ? 'vip' : 'credits';
+                const credits = Number(item.credits ?? item.promoCredits ?? item.newCredits ?? item.amount ?? item.originalCredits ?? 0);
+                const originalCredits = Number(item.originalCredits ?? item.original ?? item.oldCredits ?? item.credits ?? credits);
+                const promoCredits = Number(item.promoCredits ?? item.newCredits ?? item.amount ?? item.credits ?? credits);
+                const vipDays = Number(item.vipDays ?? item.vip_days ?? item.days ?? 30);
+                const rawId = String(item.id || item.sku || item.packageId || `${type}-${index + 1}`).trim();
+                return {
+                    id: rawId.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 48) || `${type}-${index + 1}`,
+                    type,
+                    title: String(item.title || item.name || `活动套餐 ${index + 1}`).trim(),
+                    price: String(item.price || item.amountText || '').trim(),
+                    originalPrice: String(item.originalPrice || item.oldPrice || item.marketPrice || '').trim(),
+                    credits: Number.isFinite(credits) ? Math.max(0, credits) : 0,
+                    originalCredits: Number.isFinite(originalCredits) ? Math.max(0, originalCredits) : 0,
+                    promoCredits: Number.isFinite(promoCredits) ? Math.max(0, promoCredits) : 0,
+                    vipDays: Number.isFinite(vipDays) ? Math.max(0, Math.floor(vipDays)) : 30,
+                    benefitText: String(item.benefitText || item.benefit || '').trim(),
+                    tag: String(item.tag || item.badge || item.discount || '').trim()
+                };
+            }).filter(item => item.type === 'vip' || item.credits > 0 || item.promoCredits > 0);
+
+            return normalized.length ? normalized : DEFAULT_RECHARGE_PACKAGES.map(item => ({
+                ...item,
+                id: item.id || `${item.type}-${item.credits || 'vip'}`
+            }));
+        }
+
+        function encodeJsArg(value) {
+            return encodeURIComponent(String(value == null ? '' : value));
+        }
+
+        function rechargeButtonHtml(item, label) {
+            const paymentMode = String(state.site.payment?.mode || 'card_link').trim();
+            const handler = paymentMode === 'card_link' ? 'openPurchaseCardUrl' : 'startAlipayRecharge';
+            return `<button class="account-btn primary wallet-package-pay" type="button" onclick="${handler}('${encodeJsArg(item.id)}', this)">${escapeHtml(label)}</button>`;
+        }
+
+        function renderRechargePackages(packages = state.site.rechargePackages) {
+            const list = normalizeRechargePackages(packages)
+                .slice()
+                .sort((a, b) => (a.type === 'vip' ? -1 : 0) - (b.type === 'vip' ? -1 : 0));
+            state.site.rechargePackages = list;
+            const container = document.getElementById('walletRechargePackages');
+            if (!container) return;
+
+            const vipItem = list.find(item => item.type === 'vip');
+            const creditItems = list.filter(item => item.type !== 'vip');
+            const vipHtml = vipItem ? `
+                <article class="wallet-vip-offer">
+                    <div class="wallet-vip-main">
+                        <div class="wallet-vip-top">
+                            <div class="wallet-vip-title">${escapeHtml(vipItem.title || '开通 VIP')}</div>
+                            ${vipItem.tag ? `<span class="wallet-deal-tag">${escapeHtml(vipItem.tag)}</span>` : ''}
+                        </div>
+                        <div class="wallet-vip-desc">${escapeHtml(vipItem.benefitText || '解锁会员权益')}</div>
+                        <div class="wallet-vip-price">${packagePriceHtml(vipItem)}</div>
+                    </div>
+                    <div class="wallet-vip-action">
+                        ${rechargeButtonHtml(vipItem, '开通 VIP')}
+                    </div>
+                </article>
+            ` : '';
+            const creditsHtml = `
+                <div class="wallet-package-list">
+                    ${creditItems.map((item, index) => `
+                        <article class="wallet-credit-card ${index === creditItems.length - 1 && creditItems.length % 2 === 1 ? 'is-wide' : ''}">
+                            <div class="wallet-credit-main">
+                                <div class="wallet-credit-top">
+                                    <div class="wallet-credit-amount">${formatPackageCredits(item.credits || item.promoCredits)}<span>积分</span></div>
+                                    ${item.tag ? `<span class="wallet-deal-tag">${escapeHtml(item.tag)}</span>` : ''}
+                                </div>
+                                <div class="wallet-credit-price">${packagePriceHtml(item)}</div>
+                            </div>
+                            <div class="wallet-credit-action">
+                                ${rechargeButtonHtml(item, '充值')}
+                            </div>
+                        </article>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = `${vipHtml}${creditsHtml}`;
+        }
+
+        function renderSiteConfig(site = {}) {
+            const rechargePackages = normalizeRechargePackages(site.rechargePackages || state.site.rechargePackages);
+            state.site = {
+                ...state.site,
+                ...site,
+                rechargePackages,
+                payment: {
+                    ...state.site.payment,
+                    ...(site.payment || {})
+                }
+            };
+            renderRechargePackages(rechargePackages);
+        }
+
+        async function loadSiteBrand() {
+            try {
+                const res = await fetch(`${API}/config`);
+                if (!res.ok) return;
+                const data = await res.json();
+                renderSiteConfig(data && data.site ? data.site : {});
+                const siteName = data && data.site && data.site.name ? String(data.site.name).trim() : '';
+                if (!siteName) return;
+                document.title = `用户中心 - ${siteName}`;
+                const nameEl = document.getElementById('accountBrandName');
+                if (nameEl) nameEl.textContent = siteName;
+            } catch (error) {
+                console.warn('加载网站名称失败:', error.message);
+            }
+        }
+
+        const viewMeta = {
+            overview: ['总览', '账户余额、最近记录和创作入口'],
+            credits: ['钱包', '兑换码充值、邀请返利和额度流水'],
+            tasks: ['生成记录', '查看最近生成任务和状态'],
+            settings: ['账号设置', '昵称、头像、密码和登录状态']
+        };
+
+        const viewAliases = {
+            wallet: 'credits',
+            usage: 'credits',
+            redeem: 'credits',
+            account: 'settings',
+            security: 'settings'
+        };
+
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        function requireLogin() {
+            if (!token || !currentUser) {
+                location.href = 'login.html?tab=login&redirect=user.html';
+                return false;
+            }
+            return true;
+        }
+
+        async function apiFetch(path, options = {}) {
+            const res = await fetch(`${API}${path}`, {
+                ...options,
+                headers: { ...authHeaders(), ...(options.headers || {}) }
+            });
+            if (res.status === 401) {
+                logout();
+                return null;
+            }
+            return res;
+        }
+
+        function normalizeViewName(name) {
+            return viewMeta[name] ? name : (viewAliases[name] || 'overview');
+        }
+
+        function switchView(name) {
+            name = normalizeViewName(name);
+            document.documentElement.dataset.initialView = name;
+            document.body.dataset.activeView = name;
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(`view-${name}`)?.classList.add('active');
+            document.querySelector(`.nav-item[data-view="${name}"]`)?.classList.add('active');
+            const meta = viewMeta[name] || viewMeta.overview;
+            document.getElementById('viewTitle').textContent = meta[0];
+            document.getElementById('viewSubtitle').textContent = meta[1];
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('view', name);
+            window.history.replaceState({}, '', nextUrl);
+        }
+
+        function getInitialViewName() {
+            const params = new URLSearchParams(window.location.search);
+            const queryView = params.get('view');
+            const hashView = String(window.location.hash || '').replace(/^#/, '');
+            return queryView || hashView || 'overview';
+        }
+
+        function setStatus(id, message, type) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = message || '';
+            el.className = `toast-line ${type || ''}`;
+        }
+
+        function formatTime(value) {
+            if (!value) return '--';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return value;
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function roleLabel(role) {
+            return role === 'admin' ? '管理员' : role === 'vip' ? 'VIP' : '普通用户';
+        }
+
+        function isVipUser(user) {
+            if (!user || (user.role !== 'vip' && !(user.role === 'admin' && user.vip_expires_at))) return false;
+            if (!user.vip_expires_at) return true;
+            const expiresAt = new Date(user.vip_expires_at).getTime();
+            return Number.isFinite(expiresAt) && expiresAt > Date.now();
+        }
+
+        function sourceLabel(source) {
+            return {
+                ppt: 'PPT',
+                image: '图片',
+                video: '视频',
+                chat: '对话',
+                registration_bonus: '注册送',
+                redemption: '兑换码',
+                referral_reward: '邀请返利',
+                vip_bonus: 'VIP赠送',
+                vip_bonus_expiry: 'VIP到期清空',
+                adjustment: '额度调整'
+            }[source] || '额度';
+        }
+
+        async function copyText(value) {
+            const text = String(value || '').trim();
+            if (!text) return false;
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+            const input = document.createElement('textarea');
+            input.value = text;
+            input.style.position = 'fixed';
+            input.style.left = '-9999px';
+            document.body.appendChild(input);
+            input.focus();
+            input.select();
+            const ok = document.execCommand('copy');
+            input.remove();
+            return ok;
+        }
+
+        function setReferralCopyStatus(message, type = '') {
+            ['referralCopyStatus', 'walletReferralCopyStatus'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = message || '';
+                el.className = `referral-note ${type || ''}`;
+            });
+        }
+
+        async function copyReferralCode() {
+            const ok = await copyText(state.referral?.invite_code || '');
+            setReferralCopyStatus(ok ? '邀请码已复制' : '暂无可复制的邀请码', ok ? 'success' : 'error');
+        }
+
+        async function copyReferralLink() {
+            const ok = await copyText(state.referral?.invite_link || '');
+            setReferralCopyStatus(ok ? '邀请链接已复制' : '暂无可复制的邀请链接', ok ? 'success' : 'error');
+        }
+
+        function statusLabel(status) {
+            return {
+                pending: '排队中',
+                processing: '处理中',
+                completed: '已完成',
+                failed: '失败'
+            }[status] || status || '--';
+        }
+
+        function renderUser(user) {
+            currentUser = { ...currentUser, ...user };
+            localStorage.setItem('aimaster_user', JSON.stringify(currentUser));
+            const initial = (user.username || user.email || 'U').slice(0, 1).toUpperCase();
+            const sidebarAvatar = document.getElementById('sidebarAvatar');
+            sidebarAvatar.textContent = initial;
+            sidebarAvatar.classList.toggle('is-vip', isVipUser(user));
+            document.getElementById('sidebarName').textContent = user.username || '用户';
+            document.getElementById('sidebarEmail').textContent = user.email || '';
+            document.getElementById('usernameInput').value = user.username || '';
+            document.getElementById('avatarInput').value = user.avatar || '';
+            document.getElementById('infoEmail').textContent = user.email || '--';
+            document.getElementById('infoRole').textContent = user.role === 'admin' && isVipUser(user) ? '管理员 · VIP' : roleLabel(user.role);
+            document.getElementById('infoCreatedAt').textContent = formatTime(user.created_at);
+            document.getElementById('securityEmail').textContent = user.email || '--';
+            const walletUserLabel = document.getElementById('walletUserLabel');
+            if (walletUserLabel) {
+                walletUserLabel.textContent = `${user.username || user.email || '用户'}（${roleLabel(user.role)}）`;
+            }
+        }
+
+        function renderStorage(storage) {
+            state.storage = storage || null;
+            const statusEl = document.getElementById('storageStatus');
+            const helpEl = document.getElementById('storageHelp');
+            if (!statusEl || !helpEl) return;
+
+            if (!storage) {
+                statusEl.textContent = '--';
+                helpEl.textContent = '普通用户图片 10 张，PPT 3 套';
+                return;
+            }
+
+            if (storage.unlimited) {
+                statusEl.textContent = storage.role === 'admin' ? '管理员不限' : 'VIP 不限';
+                helpEl.textContent = storage.vip_expires_at
+                    ? `图片和 PPT 不限制，有效至 ${formatTime(storage.vip_expires_at)}`
+                    : '图片和 PPT 保存不限制';
+                return;
+            }
+
+            const imageUsed = Number(storage.usage?.image || 0);
+            const pptUsed = Number(storage.usage?.ppt || 0);
+            const imageLimit = Number(storage.limits?.image || 10);
+            const pptLimit = Number(storage.limits?.ppt || 3);
+            statusEl.textContent = `${imageUsed}/${imageLimit} 图`;
+            helpEl.textContent = `PPT ${pptUsed}/${pptLimit} 套，每天 02:00 保留最新内容`;
+        }
+
+        function renderQuota(quota) {
+            const credits = quota?.credits || quota?.universal || { total: 0, used: 0, remaining: 0 };
+            const total = Number(credits.total || 0);
+            const used = Number(credits.used || 0);
+            const remaining = Number(credits.remaining || 0);
+            const vipBonusRemaining = Number(credits.vip_bonus?.remaining || 0);
+            const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
+
+            document.getElementById('creditRemaining').textContent = remaining;
+            document.getElementById('creditTotal').textContent = total;
+            document.getElementById('creditUsed').textContent = used;
+            document.getElementById('walletCreditRemaining').textContent = remaining;
+            document.getElementById('walletCreditUsed').textContent = used;
+            document.getElementById('creditProgress').style.width = `${pct}%`;
+            document.getElementById('creditStatus').textContent = vipBonusRemaining > 0
+                ? `VIP额度剩余 ${vipBonusRemaining}`
+                : (remaining > 0 ? '可用' : '额度不足');
+        }
+
+        function renderReferral(referral) {
+            state.referral = referral || null;
+            const inviteCode = referral?.invite_code || '';
+            const inviteLink = referral?.invite_link || '';
+            const inviteCodeText = inviteCode || '邀请码生成中';
+            const inviteLinkText = inviteLink || '邀请链接生成中';
+            document.getElementById('walletReferralInvitedCount').textContent = Number(referral?.invited_count || 0);
+            document.getElementById('walletReferralRewardTotal').textContent = Number(referral?.reward_total || 0);
+            document.getElementById('walletReferralRewardCount').textContent = Number(referral?.reward_count || 0);
+            document.getElementById('walletReferralInviteCode').value = inviteCodeText;
+            document.getElementById('walletReferralInviteLink').value = inviteLinkText;
+            [
+                document.getElementById('walletReferralInviteCode')
+            ].forEach(input => input?.classList.toggle('is-empty', !inviteCode));
+            [
+                document.getElementById('walletReferralInviteLink')
+            ].forEach(input => input?.classList.toggle('is-empty', !inviteLink));
+            if (!inviteCode || !inviteLink) {
+                setReferralCopyStatus('邀请码正在生成，请刷新页面或稍后重试。', 'error');
+            }
+        }
+
+        function renderStats(stats) {
+            const total = stats?.total ?? 0;
+            document.getElementById('taskTotal').textContent = total;
+        }
+
+        function transactionAmount(item) {
+            const amount = Number(item.amount || 0);
+            const sign = item.direction === 'credit' ? '+' : '-';
+            const cls = item.direction === 'credit' ? 'amount-plus' : 'amount-minus';
+            return `<span class="${cls}">${sign}${amount}</span>`;
+        }
+
+        function estimateTaskCost(task) {
+            if (task.status !== 'completed') return 0;
+            const billed = Number(task.result_data?.billing?.charged_credits || 0);
+            if (billed > 0) return billed;
+
+            if (task.type === 'image') {
+                const images = task.result_data?.images;
+                if (Array.isArray(images) && images.length) return images.length * 3;
+                return Math.max(1, Number(task.params?.n || task.params?.count || 1) || 1) * 3;
+            }
+            if (task.type === 'ppt') {
+                const pageCount = Math.max(1, Number(task.result_data?.page_count || task.params?.pageCount || task.params?.page_count || 1) || 1);
+                const imageAssets = Array.isArray(task.result_data?.image_assets) ? task.result_data.image_assets : [];
+                const generatedImageCount = imageAssets.filter(asset => asset?.origin !== 'template_reference').length;
+                return pageCount + generatedImageCount * 3;
+            }
+            return 1;
+        }
+
+        function derivedTaskTransactions() {
+            return state.tasks
+                .map(task => {
+                    const amount = estimateTaskCost(task);
+                    if (!amount) return null;
+                    return {
+                        id: `task-${task.id}`,
+                        direction: 'debit',
+                        amount,
+                        source: task.type,
+                        note: `历史任务 #${task.id}`,
+                        balance_after: null,
+                        created_at: task.completed_at || task.created_at
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        function activeLedgerSource() {
+            return state.creditHistory.length ? state.creditHistory : derivedTaskTransactions();
+        }
+
+        function ledgerRows(rows, limit = null) {
+            const data = limit ? rows.slice(0, limit) : rows;
+            if (!data.length) {
+                return '<div class="empty-state">暂无额度流水</div>';
+            }
+
+            return `
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>类型</th>
+                                <th>变动</th>
+                                <th>余额</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(item => `
+                                <tr>
+                                    <td>${formatTime(item.created_at)}</td>
+                                    <td><span class="type-pill">${sourceLabel(item.source)}</span></td>
+                                    <td>${transactionAmount(item)}</td>
+                                    <td>${item.balance_after == null ? '--' : Number(item.balance_after || 0)}</td>
+                                    <td>${escapeHtml(item.note || sourceLabel(item.source))}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderLedger() {
+            const direction = document.getElementById('ledgerDirectionFilter')?.value || '';
+            const source = document.getElementById('ledgerSourceFilter')?.value || '';
+            const baseRows = activeLedgerSource();
+            const rows = baseRows.filter(item => {
+                if (direction && item.direction !== direction) return false;
+                if (source && item.source !== source) return false;
+                return true;
+            });
+
+            document.getElementById('ledgerTable').innerHTML = ledgerRows(rows);
+            document.getElementById('recentLedger').innerHTML = ledgerRows(baseRows, 5);
+
+            const now = new Date();
+            const monthUsed = baseRows
+                .filter(item => item.direction === 'debit')
+                .filter(item => {
+                    const d = new Date(item.created_at);
+                    return !Number.isNaN(d.getTime()) && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+                })
+                .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            document.getElementById('monthUsed').textContent = monthUsed;
+        }
+
+        function renderRedeemHistory() {
+            document.getElementById('redeemCount').textContent = state.redeemHistory.length;
+            if (!state.redeemHistory.length) {
+                document.getElementById('redeemHistory').innerHTML = '<div class="empty-state">暂无兑换记录</div>';
+                return;
+            }
+
+            document.getElementById('redeemHistory').innerHTML = `
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>兑换码</th>
+                                <th>到账权益</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${state.redeemHistory.map(item => `
+                                <tr>
+                                    <td>${formatTime(item.redeemed_at)}</td>
+                                    <td><strong>${escapeHtml(item.code || '')}</strong></td>
+                                    <td><span class="amount-plus">${item.reward_type === 'vip'
+                                        ? `${Number(item.vip_days || 0) > 0 ? `VIP ${Number(item.vip_days)}天` : 'VIP 永久'} + ${Number(item.bonus_credits || 500)}限时额度`
+                                        : `+${Number(item.credits || 0)}`}</span></td>
+                                    <td>${escapeHtml(item.note || '--')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function switchWalletRecordTab(tab) {
+            const nextTab = tab === 'redeem' ? 'redeem' : 'ledger';
+            state.walletRecordTab = nextTab;
+            document.querySelectorAll('[data-wallet-record-tab]').forEach(button => {
+                const active = button.dataset.walletRecordTab === nextTab;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            document.querySelectorAll('[data-wallet-record-pane]').forEach(pane => {
+                pane.hidden = pane.dataset.walletRecordPane !== nextTab;
+            });
+        }
+
+        function renderTasks() {
+            if (!state.tasks.length) {
+                document.getElementById('recentTasks').innerHTML = '<div class="empty-state">暂无任务记录</div>';
+                document.getElementById('taskTable').innerHTML = '<div class="empty-state">暂无任务记录</div>';
+                return;
+            }
+
+            const tableHtml = `
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>类型</th>
+                                <th>状态</th>
+                                <th>时间</th>
+                                <th>描述</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${state.tasks.map(task => `
+                                <tr>
+                                    <td><span class="type-pill">${sourceLabel(task.type)}</span></td>
+                                    <td><span class="status-pill ${escapeHtml(task.status || '')}">${statusLabel(task.status)}</span></td>
+                                    <td>${formatTime(task.created_at)}</td>
+                                    <td class="prompt-cell">${escapeHtml(task.prompt || '--')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('taskTable').innerHTML = tableHtml;
+            document.getElementById('recentTasks').innerHTML = `
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>类型</th>
+                                <th>状态</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${state.tasks.slice(0, 8).map(task => `
+                                <tr>
+                                    <td><span class="type-pill">${sourceLabel(task.type)}</span></td>
+                                    <td><span class="status-pill ${escapeHtml(task.status || '')}">${statusLabel(task.status)}</span></td>
+                                    <td>${formatTime(task.created_at)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function loadMe() {
+            const res = await apiFetch('/auth/me');
+            if (!res) return;
+            const data = await res.json();
+            state.quota = data.quota;
+            state.storage = data.storage || null;
+            renderUser(data.user);
+            renderQuota(data.quota);
+            renderStorage(data.storage);
+            renderReferral(data.referral);
+        }
+
+        async function loadStats() {
+            const res = await apiFetch('/ai/stats');
+            if (!res || !res.ok) return;
+            const data = await res.json();
+            state.stats = data.stats;
+            if (data.storage) renderStorage(data.storage);
+            renderStats(data.stats);
+        }
+
+        async function loadCreditHistory() {
+            const res = await apiFetch('/auth/credits/history?limit=100');
+            if (!res || !res.ok) return;
+            const data = await res.json();
+            state.creditHistory = Array.isArray(data.history) ? data.history : [];
+            renderLedger();
+        }
+
+        async function loadRedeemHistory() {
+            const res = await apiFetch('/auth/redeem/history?limit=50');
+            if (!res || !res.ok) return;
+            const data = await res.json();
+            state.redeemHistory = Array.isArray(data.history) ? data.history : [];
+            renderRedeemHistory();
+        }
+
+        function detectPayClient() {
+            const ua = navigator.userAgent || '';
+            return /Mobile|Android|iPhone|iPad|iPod/i.test(ua) ? 'wap' : 'page';
+        }
+
+        function openPurchaseCardUrl(packageId, triggerBtn) {
+            const id = decodeURIComponent(String(packageId || ''));
+            const purchaseUrl = String(state.site.payment?.purchaseCardUrl || '').trim();
+            if (!purchaseUrl) {
+                setStatus('redeemStatus', '暂未配置兑换码购买链接，请联系管理员', 'error');
+                return;
+            }
+
+            const btn = triggerBtn || null;
+            if (btn) btn.disabled = true;
+            setStatus('redeemStatus', '正在跳转到兑换码购买页面...');
+
+            try {
+                const target = new URL(purchaseUrl, window.location.origin);
+                if (!['http:', 'https:'].includes(target.protocol)) {
+                    throw new Error('unsupported purchase URL protocol');
+                }
+                if (id && !target.searchParams.has('package_id')) {
+                    target.searchParams.set('package_id', id);
+                }
+                if (!target.searchParams.has('return_url')) {
+                    target.searchParams.set('return_url', `${window.location.origin}/user.html?view=credits`);
+                }
+                window.location.href = target.toString();
+            } catch (error) {
+                if (btn) btn.disabled = false;
+                setStatus('redeemStatus', '兑换码购买链接格式不正确，请联系管理员', 'error');
+            }
+        }
+
+        async function startAlipayRecharge(packageId, triggerBtn) {
+            const id = decodeURIComponent(String(packageId || ''));
+            if (!id) {
+                setStatus('redeemStatus', '充值套餐不存在，请刷新后重试', 'error');
+                return;
+            }
+            const btn = triggerBtn || null;
+            const originalText = btn ? btn.textContent : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '下单中...';
+            }
+            setStatus('redeemStatus', '正在创建支付宝订单...');
+            try {
+                throw new Error('本地图片版已关闭在线支付，请使用管理员生成的兑换码。');
+                const res = await apiFetch('/pay/alipay/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        package_id: id,
+                        client: detectPayClient()
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setStatus('redeemStatus', data.error || '创建支付宝订单失败', 'error');
+                    return;
+                }
+                if (!data.pay_url) {
+                    setStatus('redeemStatus', '后端未返回支付宝支付地址', 'error');
+                    return;
+                }
+                window.location.href = data.pay_url;
+            } catch (error) {
+                setStatus('redeemStatus', error.message || '创建支付宝订单失败', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = originalText || '充值';
+                }
+            }
+        }
+
+        async function checkReturnedPayment() {
+            const url = new URL(window.location.href);
+            const orderNo = url.searchParams.get('pay_order') || url.searchParams.get('out_trade_no');
+            if (!orderNo) return;
+
+            switchView('credits');
+            setStatus('redeemStatus', '正在确认支付宝支付结果...');
+            try {
+                const res = await apiFetch(`/pay/orders/${encodeURIComponent(orderNo)}`);
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setStatus('redeemStatus', data.error || '支付结果查询失败', 'error');
+                    return;
+                }
+                if (data.order?.status === 'paid') {
+                    setStatus('redeemStatus', '支付成功，额度已到账', 'success');
+                    await Promise.all([loadMe(), loadCreditHistory()]);
+                } else {
+                    setStatus('redeemStatus', '订单还在确认中，若已付款请稍后刷新钱包', '');
+                }
+            } catch (error) {
+                setStatus('redeemStatus', error.message || '支付结果查询失败', 'error');
+            } finally {
+                url.searchParams.delete('pay_order');
+                url.searchParams.delete('out_trade_no');
+                url.searchParams.delete('trade_no');
+                url.searchParams.delete('total_amount');
+                window.history.replaceState({}, '', url);
+            }
+        }
+
+        async function loadTasks() {
+            const res = await apiFetch('/ai/tasks?limit=20');
+            if (!res || !res.ok) return;
+            const data = await res.json();
+            state.tasks = Array.isArray(data.tasks) ? data.tasks : [];
+            renderTasks();
+            if (!state.creditHistory.length) renderLedger();
+        }
+
+        async function refreshAccountData() {
+            await Promise.all([
+                loadMe(),
+                loadStats(),
+                loadCreditHistory(),
+                loadRedeemHistory(),
+                loadTasks()
+            ]);
+        }
+
+        document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+            btn.addEventListener('click', () => switchView(btn.dataset.view));
+        });
+
+        document.querySelectorAll('[data-jump]').forEach(btn => {
+            btn.addEventListener('click', () => switchView(btn.dataset.jump));
+        });
+
+        document.querySelectorAll('[data-wallet-record-tab]').forEach(button => {
+            button.addEventListener('click', () => switchWalletRecordTab(button.dataset.walletRecordTab));
+        });
+
+        document.getElementById('ledgerDirectionFilter').addEventListener('change', renderLedger);
+        document.getElementById('ledgerSourceFilter').addEventListener('change', renderLedger);
+
+        document.getElementById('redeemForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const code = document.getElementById('redeemCode').value.trim();
+            if (!code) {
+                setStatus('redeemStatus', '请输入兑换码', 'error');
+                return;
+            }
+
+            const btn = event.submitter;
+            if (btn) btn.disabled = true;
+            setStatus('redeemStatus', '正在兑换...');
+            try {
+                const res = await apiFetch('/auth/redeem', {
+                    method: 'POST',
+                    body: JSON.stringify({ code })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setStatus('redeemStatus', data.error || '兑换失败', 'error');
+                    return;
+                }
+                if (data.user) {
+                    currentUser = { ...currentUser, ...data.user };
+                    localStorage.setItem('aimaster_user', JSON.stringify(currentUser));
+                    renderUser(currentUser);
+                }
+                document.getElementById('redeemCode').value = '';
+                setStatus('redeemStatus', data.message || '兑换成功', 'success');
+                await Promise.all([loadMe(), loadCreditHistory(), loadRedeemHistory()]);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const btn = event.submitter;
+            if (btn) btn.disabled = true;
+            setStatus('profileStatus', '正在保存...');
+            try {
+                const res = await apiFetch('/auth/me', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        username: document.getElementById('usernameInput').value.trim(),
+                        avatar: document.getElementById('avatarInput').value.trim()
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setStatus('profileStatus', data.error || '保存失败', 'error');
+                    return;
+                }
+                renderUser(data.user);
+                setStatus('profileStatus', '资料已更新', 'success');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const btn = event.submitter;
+            if (btn) btn.disabled = true;
+            setStatus('passwordStatus', '正在更新...');
+            try {
+                const res = await apiFetch('/auth/password', {
+                    method: 'PUT',
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setStatus('passwordStatus', data.error || '修改失败', 'error');
+                    return;
+                }
+                document.getElementById('passwordForm').reset();
+                setStatus('passwordStatus', '密码已更新', 'success');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('aimaster_token');
+            localStorage.removeItem('aimaster_user');
+            location.href = 'login.html';
+        }
+
+        renderSiteConfig({});
+        loadSiteBrand();
+        switchWalletRecordTab(state.walletRecordTab);
+
+        if (requireLogin()) {
+            refreshAccountData();
+            switchView(getInitialViewName());
+            checkReturnedPayment();
+        }
+    </script>
+    <script src="assets/js/site-brand.js"></script>
+</body>
+</html>

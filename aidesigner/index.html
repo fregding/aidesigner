@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Designer - AI智能创作平台 | PPT · 图片 · 视频</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <meta name="description" content="AI Designer 提供 PPT、图片、本地图片入口，支持任务记录、历史下载和控制台管理。" />
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                </div>
+                <span class="logo-text">AI Designer</span>
+            </a>
+            
+            <nav class="nav-links" id="navLinks">
+                <a href="#features" class="nav-link">核心功能</a>
+                <a href="#tools" class="nav-link">工具中心</a>
+                <a href="usage.html" class="nav-link">使用指南</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button class="notice-trigger" id="noticeTrigger" type="button" aria-label="查看公告" title="查看公告" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notice-dot" aria-hidden="true"></span>
+                </button>
+                <!-- 未登录状态 -->
+                <a href="login.html" class="btn btn-ghost btn-login" id="loginBtn">登录</a>
+                <a href="login.html?tab=register" class="btn btn-primary" id="registerBtn">注册</a>
+                <!-- 已登录状态 - 用户下拉菜单 -->
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <button class="user-trigger" id="userTrigger" type="button" aria-label="用户菜单" aria-expanded="false">
+                        <div class="user-avatar" id="userAvatar">
+                            <span id="userInitial">U</span>
+                        </div>
+                        <span class="user-nav-name" id="userNavName">用户名</span>
+                        <svg class="user-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="user-menu" id="userMenu">
+                        <a href="dashboard.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            控制台
+                        </a>
+                        <a href="user.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            用户中心
+                        </a>
+                        <a href="usage.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            使用指南
+                        </a>
+                        <a href="admin.html" class="user-menu-item admin-menu-item" id="adminMenuItem" style="display:none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            管理后台
+                        </a>
+                        <div class="user-menu-divider"></div>
+                        <a href="#" class="user-menu-item logout" id="logoutBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="#features" class="mobile-nav-link">核心功能</a>
+            <a href="#tools" class="mobile-nav-link">工具中心</a>
+            <a href="usage.html" class="mobile-nav-link">使用指南</a>
+            <div class="mobile-nav-actions">
+                <a href="login.html" class="btn btn-ghost btn-full">登录</a>
+                <a href="dashboard.html" class="btn btn-primary btn-full">立即开始</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <!-- Hero 区域 -->
+        <section class="hero" id="hero">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span>AI创作工作台</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="title-line">整理需求</span>
+                    <span class="title-line gradient-text">AI驱动创作</span>
+                    <span class="title-line">交付成稿</span>
+                </h1>
+                <p class="hero-description">
+                    在控制台选择 PPT、图片或视频工具，提交需求后查看进度、预览结果并下载文件。
+                    <br>支持模板、参考图和历史记录，方便继续修改。
+                </p>
+                <div class="hero-actions">
+                    <a href="dashboard.html" class="btn btn-primary btn-lg">
+                        <span>立刻开始创作</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="usage.html" class="btn btn-outline btn-lg">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        <span>查看文档</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="homeUserCount" data-stat-format="compact">--</span>
+                        <span class="stat-label">注册用户</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="homeWorkCount" data-stat-format="compact">--</span>
+                        <span class="stat-label">已完成任务</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="homeToolCount" data-stat-format="compact">--</span>
+                        <span class="stat-label">核心工具</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 功能特性区 -->
+        <section class="features" id="features">
+            <div class="section-header">
+                <span class="section-tag">平台能力</span>
+                <h2 class="section-title">把创作流程放到<span class="gradient-text">一个工作台</span></h2>
+                <p class="section-desc">围绕 PPT、图片和本地图片，把需求提交、进度查看和结果下载集中处理。</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <h3>任务生成</h3>
+                    <p>提交需求后自动创建任务，生成进度和结果会在对应工具页持续更新。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <h3>参数控制</h3>
+                    <p>支持模板、参考图、比例、清晰度等参数，让输出更贴近你的实际使用场景。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h3>需求描述</h3>
+                    <p>用自然语言描述需求，系统会按工具类型整理参数并提交生成任务。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 工具中心 -->
+        <section class="tools" id="tools">
+            <div class="section-header">
+                <span class="section-tag">创作工具</span>
+                <h2 class="section-title">三大AI<span class="gradient-text">核心工具</span></h2>
+                <p class="section-desc">选择适合当前任务的工具，按页面提示填写参数并查看生成结果。</p>
+            </div>
+            
+            <div class="tools-showcase">
+                <!-- 本地图片工具 -->
+                <div class="tool-card tool-ppt" data-tool="ppt">
+                    <div class="tool-badge">PPT 工具</div>
+                    <div class="tool-visual">
+                        <div class="ppt-preview">
+                            <div class="slide-mockup">
+                                <div class="slide-header"></div>
+                                <div class="slide-content">
+                                    <div class="mock-title"></div>
+                                    <div class="mock-text"></div>
+                                    <div class="mock-text short"></div>
+                                </div>
+                                <div class="slide-dots">
+                                    <span class="active"></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-glow"></div>
+                    </div>
+                    <div class="tool-info">
+                        <div class="tool-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18M9 21V9"/>
+                            </svg>
+                        </div>
+                        <h3>AI生成PPT</h3>
+                        <p>输入主题、页数和场景要求，生成可下载并继续编辑的演示文稿。</p>
+                        <ul class="tool-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>支持模板和资料参考</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>自动生成 PPTX</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>生成记录可追溯</span>
+                            </li>
+                        </ul>
+                        <a href="image.html" class="btn btn-primary btn-block">
+                            立即体验
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 图片生成工具 -->
+                <div class="tool-card tool-image" data-tool="image" onclick="location.href='image.html'">
+                    <div class="tool-badge hot">图片工具</div>
+                    <div class="tool-visual">
+                        <div class="image-preview">
+                            <div class="image-grid">
+                                <div class="grid-item"></div>
+                                <div class="grid-item"></div>
+                                <div class="grid-item"></div>
+                                <div class="grid-item"></div>
+                            </div>
+                            <div class="image-prompt">
+                                <span class="prompt-icon">✨</span>
+                                <span>一个未来城市的夜景...</span>
+                            </div>
+                        </div>
+                        <div class="tool-glow"></div>
+                    </div>
+                    <div class="tool-info">
+                        <div class="tool-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                        </div>
+                        <h3>AI生成图片</h3>
+                        <p>输入画面描述，选择比例、清晰度和格式，也可以上传参考图辅助生成。</p>
+                        <ul class="tool-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>支持参考图</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>可选比例和清晰度</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>历史图库可下载</span>
+                            </li>
+                        </ul>
+                        <a href="image.html" class="btn btn-primary btn-block">
+                            立即体验
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 本地图片工具 -->
+                <div class="tool-card tool-video" data-tool="video" onclick="location.href="image.html"">
+                    <div class="tool-badge beta">本地图片</div>
+                    <div class="tool-visual">
+                        <div class="video-preview">
+                            <div class="video-mockup">
+                                <div class="video-player">
+                                    <div class="play-btn">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <polygon points="5 3 19 12 5 21 5 3"/>
+                                        </svg>
+                                    </div>
+                                    <div class="video-timeline">
+                                        <div class="timeline-progress"></div>
+                                    </div>
+                                </div>
+                                <div class="video-effect"></div>
+                            </div>
+                        </div>
+                        <div class="tool-glow"></div>
+                    </div>
+                    <div class="tool-info">
+                        <div class="tool-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                <polygon points="10 9 16 12 10 15 10 9"/>
+                            </svg>
+                        </div>
+                        <h3>AI生成视频</h3>
+                        <p>输入视频要求，选择文生视频或图生视频，生成后可预览和下载。</p>
+                        <ul class="tool-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>文生视频</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>支持首帧和参考图</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>视频图库可下载</span>
+                            </li>
+                        </ul>
+                        <a href="image.html" class="btn btn-primary btn-block" onclick="event.stopPropagation()">
+                            立即体验
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA区域 -->
+        <section class="cta">
+            <div class="cta-content">
+                <h2>从控制台开始创建任务</h2>
+                <p>进入控制台，选择 PPT、图片或视频工具开始创作。</p>
+                <div class="cta-actions">
+                    <a href="dashboard.html" class="btn btn-white btn-lg">
+                        进入控制台
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="cta-decoration">
+                <div class="deco-circle"></div>
+                <div class="deco-circle"></div>
+                <div class="deco-circle"></div>
+            </div>
+        </section>
+
+        <!-- 关于我们 -->
+        <section class="about" id="about">
+            <div class="about-content">
+                <h2>关于 <span class="gradient-text">AI Designer</span></h2>
+                <p>AI Designer 提供 PPT、图片、本地图片和记录管理，把提示词、参考资料、生成结果集中在一个工作台里，方便反复修改和下载。</p>
+                <div class="about-links">
+                    <a href="usage.html" class="about-link">
+                        <span>查看使用指南</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                    <a href="dashboard.html" class="about-link">
+                        <span>进入控制台</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 登录/注册弹窗 -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="login">登录</button>
+                <button class="modal-tab" data-tab="register">注册</button>
+            </div>
+
+            <!-- 登录表单 -->
+            <form class="modal-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">邮箱</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">登录</button>
+            </form>
+
+            <!-- 注册表单 -->
+            <form class="modal-form hidden" id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">邮箱</label>
+                    <input type="email" id="registerEmail" name="email" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerVerificationCode">邮箱验证码</label>
+                    <div class="verification-row">
+                        <input type="text" id="registerVerificationCode" name="verificationCode" placeholder="输入6位验证码" inputmode="numeric" maxlength="6" required>
+                        <button type="button" class="verification-send-btn" id="registerSendCodeBtn">发送验证码</button>
+                    </div>
+                    <div class="form-hint">验证码会发送到上面的邮箱，10分钟内有效。</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" placeholder="请输入密码（至少6位）" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用户信息弹窗 -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <button class="modal-close" id="userModalClose">&times;</button>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <h3 id="userName">用户名</h3>
+                <p id="userEmail">user@example.com</p>
+                <span class="user-role" id="userRole">普通用户</span>
+            </div>
+            <div class="quota-info">
+                <h4>通用额度</h4>
+                <div class="quota-item">
+                    <span class="quota-label">额度使用</span>
+                    <div class="quota-bar">
+                        <div class="quota-progress" id="creditQuota" style="width: 0%"></div>
+                    </div>
+                    <span class="quota-text" id="creditQuotaText">0 / 0</span>
+                </div>
+                <a class="btn btn-ghost btn-block" href="user.html?view=credits">进入钱包</a>
+            </div>
+            <button class="btn btn-outline btn-block" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+
+    <!-- AI创作弹窗 -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal modal-lg">
+            <button class="modal-close" id="createModalClose">&times;</button>
+            <h3 class="modal-title" id="createModalTitle">AI创作</h3>
+            <div class="create-form">
+                <div class="form-group">
+                    <label for="createPrompt">描述你的创意</label>
+                    <textarea id="createPrompt" name="prompt" placeholder="例如：创建一个关于人工智能发展趋势的PPT，包含封面、目录、三个主要章节和总结" required></textarea>
+                </div>
+                <div class="create-options" id="createOptions">
+                    <!-- 动态选项 -->
+                </div>
+                <button class="btn btn-primary btn-block" id="generateBtn">
+                    <span class="btn-text">开始生成</span>
+                    <span class="btn-loading hidden">
+                        <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4" stroke-dashoffset="10"/></svg>
+                        生成中...
+                    </span>
+                </button>
+            </div>
+            <div class="create-result hidden" id="createResult">
+                <h4>生成结果</h4>
+                <div class="result-content" id="resultContent"></div>
+                <div class="result-actions">
+                    <button class="btn btn-outline" id="downloadResult">下载</button>
+                    <button class="btn btn-primary" id="createNewBtn">继续创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 首页公告弹窗 -->
+    <div class="modal-overlay notice-modal-overlay" id="noticeModal">
+        <div class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
+            <button class="modal-close" id="noticeModalClose" type="button" aria-label="关闭公告">&times;</button>
+            <div class="notice-modal-kicker">
+                <span class="badge-dot"></span>
+                <span>站点公告</span>
+            </div>
+            <h3 class="modal-title notice-modal-title" id="noticeModalTitle">平台公告</h3>
+            <div class="notice-modal-body" id="noticeModalBody"></div>
+            <button class="btn btn-primary btn-block" id="noticeModalConfirm" type="button">我知道了</button>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                    </div>
+                    <span class="logo-text">AI Designer</span>
+                </a>
+                <p>PPT、图片、本地图片工作台</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>产品</h4>
+                    <a href="image.html">AI生成PPT</a>
+                    <a href="image.html">AI生成图片</a>
+                    <a href="image.html">AI生成视频</a>
+                    <a href="image.html">创意工坊</a>
+                </div>
+                <div class="footer-column">
+                    <h4>账户</h4>
+                    <a href="dashboard.html">控制台</a>
+                    <a href="user.html">用户中心</a>
+                    <a href="usage.html">使用指南</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 <span data-site-name>AI Designer</span>. 保留所有权利.</p>
+            <a class="footer-icp-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026030088号</a>
+        </div>
+    </footer>
+
+    <script src="assets/js/site-brand.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        // 根据登录状态显示不同按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('aimaster_token');
+            const user = localStorage.getItem('aimaster_user');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            const userName = document.getElementById('userName');
+            const userInitial = document.getElementById('userInitial');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const mobileNavActions = document.querySelector('.mobile-nav-actions');
+            const isVipUser = account => {
+                if (!account || (account.role !== 'vip' && !(account.role === 'admin' && account.vip_expires_at))) return false;
+                if (!account.vip_expires_at) return true;
+                const expiresAt = new Date(account.vip_expires_at).getTime();
+                return Number.isFinite(expiresAt) && expiresAt > Date.now();
+            };
+            
+            if (token && user) {
+                // 已登录状态 - 显示用户下拉菜单
+                const userData = JSON.parse(user);
+                const name = userData.username || userData.name || '用户';
+                const isAdmin = userData.role === 'admin';
+                const isVip = isVipUser(userData);
+
+                // 管理员显示管理后台入口
+                if (isAdmin) {
+                    const adminItem = document.getElementById('adminMenuItem');
+                    const userRole = document.getElementById('userRole');
+                    if (adminItem) adminItem.style.display = '';
+                    if (userRole) {
+                        userRole.textContent = '管理员';
+                        userRole.style.background = 'linear-gradient(135deg, #ef4444, #f97316)';
+                    }
+                }
+                
+                // 更新用户信息
+                userName.textContent = name;
+                userInitial.textContent = name.charAt(0).toUpperCase();
+                applyVipBadges(userData);
+                
+                // 隐藏登录/注册按钮，显示用户下拉
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                userDropdown.style.display = 'flex';
+                
+                // 移动端菜单也更新
+                if (mobileNavActions) {
+                    const adminLink = isAdmin ? '<a href="admin.html" class="btn btn-ghost btn-full">管理后台</a>' : '';
+                    mobileNavActions.innerHTML = `
+                        <div class="mobile-user-info">
+                            <div class="mobile-user-avatar${isVip ? ' is-vip' : ''}">${name.charAt(0).toUpperCase()}</div>
+                            <span>${name}</span>
+                        </div>
+                        <a href="dashboard.html" class="btn btn-ghost btn-full">控制台</a>
+                        <a href="user.html" class="btn btn-ghost btn-full">用户中心</a>
+                        ${adminLink}
+                        <a href="usage.html" class="btn btn-ghost btn-full">使用指南</a>
+                        <button class="btn btn-outline btn-full" id="mobileLogoutBtn">退出登录</button>
+                    `;
+                    document.getElementById('mobileLogoutBtn')?.addEventListener('click', handleLogout);
+                }
+                
+                // 退出登录
+                logoutBtn?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            } else {
+                // 未登录状态 - 显示登录/注册按钮
+                loginBtn.style.display = '';
+                registerBtn.style.display = '';
+                userDropdown.style.display = 'none';
+            }
+            
+            function handleLogout() {
+                localStorage.removeItem('aimaster_token');
+                localStorage.removeItem('aimaster_user');
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+services:
+  aidesigner:
+    build: .
+    container_name: aidesigner-local-image
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      IMAGE_BASE_URL: http://host.docker.internal:18080/v1
+      IMAGE_API_KEY: local-ai-dev-key
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backend/uploads:/app/backend/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
