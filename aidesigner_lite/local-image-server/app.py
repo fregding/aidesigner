@@ -6,7 +6,7 @@ import zlib
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -145,9 +145,31 @@ def generate_images(payload: ImageGenerationRequest, authorization: Optional[str
 
 
 @app.post('/v1/images/edits')
-def edit_images(authorization: Optional[str] = Header(default=None)):
+async def edit_images(
+    prompt: str = Form(default=''),
+    model: Optional[str] = Form(default=None),
+    size: Optional[str] = Form(default='512x512'),
+    n: Optional[int] = Form(default=1),
+    response_format: Optional[str] = Form(default='b64_json'),
+    image: Optional[UploadFile] = None,
+    mask: Optional[UploadFile] = None,
+    authorization: Optional[str] = Header(default=None),
+):
     check_auth(authorization)
-    raise HTTPException(status_code=501, detail='mock service only supports text-to-image in phase 1')
+    prompt_text = (prompt or '').strip()
+    if not prompt_text:
+        prompt_text = '(edit with reference image)'
+    count = max(1, min(int(n or 1), MAX_N))
+    image_size = size or '512x512'
+    return {
+        'created': int(time.time()),
+        'data': [
+            {'b64_json': make_mock_image(prompt_text, image_size, i)}
+            for i in range(count)
+        ],
+        'model': model or MODEL,
+        'backend': BACKEND,
+    }
 
 
 if __name__ == '__main__':
