@@ -763,7 +763,7 @@ if (imageConfig.providerType === 'pollinations') {
 
   static isMockImageMode(runtimeConfig = {}) {
     const value = this.imageProviderMode(runtimeConfig);
-    return value === 'mock' || value === 'local-mock' || value === 'placeholder' || value === 'offline';
+    return value === 'mock' || value === 'local-mock' || value === 'local' || value === 'placeholder' || value === 'offline';
   }
 
   static isLocalImageMode(runtimeConfig = {}) {

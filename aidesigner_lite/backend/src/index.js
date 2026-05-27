@@ -188,8 +188,8 @@ app.use([
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use(['/api/ai/generate/ppt', '/api/ai/generate/video', '/api/ai/generate/ppt-from-doc', '/api/ai/ppt/import'], (req, res) => {
-  res.status(410).json({ error: 'Lite 本地调试版已禁用 PPT / 视频生成功能' });
+app.use('/api/ai/generate/video', (req, res) => {
+  res.status(410).json({ error: 'Lite 本地调试版已禁用视频生成功能' });
 });
 app.use('/api/pay', (req, res) => {
   res.status(410).json({ error: 'Lite 本地调试版已禁用支付和会员功能' });

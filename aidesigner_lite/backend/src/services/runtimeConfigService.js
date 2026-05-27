@@ -1265,6 +1265,8 @@ class RuntimeConfigService {
     CONFIG_DEFINITIONS.forEach(definition => {
       if (Object.prototype.hasOwnProperty.call(normalizedOverrides, definition.key)) {
         raw[definition.key] = String(normalizedOverrides[definition.key] ?? '');
+      } else if (Object.prototype.hasOwnProperty.call(process.env, definition.key) && String(process.env[definition.key] || '').trim()) {
+        raw[definition.key] = String(process.env[definition.key] ?? '');
       } else if (Object.prototype.hasOwnProperty.call(stored, definition.key)) {
         raw[definition.key] = String(stored[definition.key] ?? '');
       } else {

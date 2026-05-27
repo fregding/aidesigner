@@ -1,27 +1,933 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>功能已禁用 - AI Designer Lite</title>
-  <style>
-    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f172a;color:#e5e7eb}
-    .card{width:min(720px,calc(100% - 32px));background:rgba(15,23,42,.86);border:1px solid rgba(148,163,184,.28);border-radius:24px;padding:36px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
-    .badge{display:inline-flex;border:1px solid rgba(96,165,250,.45);color:#93c5fd;border-radius:999px;padding:6px 12px;font-size:13px;margin-bottom:18px}
-    h1{font-size:32px;margin:0 0 12px}.muted{color:#94a3b8;line-height:1.8}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-    a{color:white;text-decoration:none;background:#2563eb;padding:12px 18px;border-radius:12px}.ghost{background:transparent;border:1px solid rgba(148,163,184,.4)}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI生成PPT - AI Designer</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        :root {
+            --accent: #FF6B4A;
+            --accent-glow: rgba(255, 107, 74, 0.3);
+            --accent-secondary: #FF8F6B;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #0b0c10;
+            color: #e5e7eb;
+            font-family: 'Outfit', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .ppt-app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .ppt-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(13,14,18,0.96);
+            z-index: 100;
+            gap: 1rem;
+        }
+        .ppt-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .ppt-header-left .logo-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff; font-weight: 700;
+        }
+        .ppt-header-left h1 {
+            font-size: 1.1rem; font-weight: 700; margin: 0;
+            letter-spacing: -0.01em;
+        }
+        .ppt-header-left .badge {
+            font-size: 0.65rem; padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(255,107,74,0.15); color: var(--accent);
+            border: 1px solid rgba(255,107,74,0.25);
+        }
+        .ppt-header-right {
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .ppt-header-right a {
+            color: rgba(255,255,255,0.6); text-decoration: none;
+            font-size: 0.82rem; font-weight: 500;
+            padding: 0.4rem 0.75rem; border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .ppt-header-right a:hover {
+            color: #fff; background: rgba(255,255,255,0.06);
+        }
+        .ppt-header-right a.active {
+            color: var(--accent); background: rgba(255,107,74,0.1);
+        }
+
+        /* Main layout */
+        .ppt-main {
+            flex: 1; display: flex; overflow: hidden; min-height: 0;
+        }
+
+        /* Left panel - input */
+        .ppt-input-panel {
+            width: min(520px, 44vw);
+            min-width: 380px;
+            display: flex; flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            background: rgba(13,14,18,0.94);
+            overflow: hidden;
+        }
+        .ppt-input-scroll {
+            flex: 1; overflow-y: auto; padding: 1.25rem;
+        }
+
+        /* Right panel - preview / result */
+        .ppt-preview-panel {
+            flex: 1; min-width: 360px;
+            display: flex; flex-direction: column;
+            background: rgba(9,10,13,0.96);
+            overflow: hidden;
+        }
+        .ppt-preview-empty {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.35); gap: 0.75rem;
+            padding: 2rem;
+        }
+        .ppt-preview-empty .icon-lg {
+            font-size: 4rem; opacity: 0.5;
+        }
+        .ppt-preview-empty p {
+            margin: 0; font-size: 0.9rem; text-align: center; line-height: 1.6;
+        }
+
+        /* Progress area */
+        .ppt-progress {
+            flex: 1; display: flex; flex-direction: column;
+            overflow-y: auto; padding: 1.5rem;
+        }
+        .ppt-progress-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .ppt-progress-header .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid rgba(255,107,74,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ppt-progress-header h3 {
+            margin: 0; font-size: 1rem; font-weight: 600;
+        }
+        .ppt-progress-header .stage-text {
+            font-size: 0.82rem; color: rgba(255,255,255,0.55);
+        }
+        .ppt-progress-bar-wrap {
+            height: 6px; background: rgba(255,255,255,0.08);
+            border-radius: 3px; margin-bottom: 1rem; overflow: hidden;
+        }
+        .ppt-progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            border-radius: 3px; transition: width 0.5s ease;
+        }
+        .ppt-stage-list {
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .ppt-stage-item {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 0.8rem; color: rgba(255,255,255,0.4);
+            padding: 0.4rem 0;
+        }
+        .ppt-stage-item.done { color: rgba(255,255,255,0.7); }
+        .ppt-stage-item.active { color: var(--accent); font-weight: 600; }
+        .ppt-stage-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.15); flex-shrink: 0;
+        }
+        .ppt-stage-item.done .ppt-stage-dot { background: #4ade80; }
+        .ppt-stage-item.active .ppt-stage-dot {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+            animation: pulse-dot 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.6); }
+        }
+
+        /* Result area */
+        .ppt-result {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 1.5rem; overflow-y: auto;
+        }
+        .ppt-result-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .ppt-result-header .check-icon {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #22c55e20; color: #4ade80;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700;
+        }
+        .ppt-result-header h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+        .ppt-preview-svgs {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.75rem; margin-bottom: 1.25rem;
+        }
+        .ppt-preview-svg-card {
+            border-radius: 10px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            transition: border-color 0.2s;
+        }
+        .ppt-preview-svg-card:hover {
+            border-color: var(--accent);
+        }
+        .ppt-preview-svg-card embed {
+            width: 100%; height: 110px; pointer-events: none;
+            background: #fff; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .ppt-preview-svg-card .label {
+            padding: 0.35rem 0.5rem; font-size: 0.7rem;
+            color: rgba(255,255,255,0.5); text-align: center;
+        }
+
+        /* Download button */
+        .ppt-download-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1.5rem; border-radius: 12px;
+            background: var(--accent); color: #fff;
+            font-size: 0.9rem; font-weight: 700; border: 0;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s; align-self: flex-start;
+        }
+        .ppt-download-btn:hover {
+            background: #ff805e; transform: translateY(-1px);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .ppt-download-btn.secondary {
+            background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+        }
+        .ppt-download-btn.secondary:hover {
+            background: rgba(255,255,255,0.12); box-shadow: none;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        .form-group label {
+            display: block; font-size: 0.78rem; font-weight: 600;
+            color: rgba(255,255,255,0.55); margin-bottom: 0.4rem;
+            letter-spacing: 0.02em;
+        }
+        .form-group textarea {
+            width: 100%; min-height: 110px; resize: vertical;
+            padding: 0.75rem 0.9rem; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: #e5e7eb;
+            font-family: inherit; font-size: 0.88rem; line-height: 1.55;
+            transition: border-color 0.2s;
+        }
+        .form-group textarea:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,107,74,0.1);
+        }
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: #e5e7eb;
+            font-family: inherit; font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,107,74,0.1);
+        }
+        .form-group select option {
+            background: #1a1b20; color: #e5e7eb;
+        }
+
+        .form-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+        }
+        .form-row-3 {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;
+        }
+
+        /* Style picker */
+        .style-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem;
+        }
+        .style-card {
+            padding: 0.55rem 0.65rem; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            cursor: pointer; transition: all 0.18s;
+            font-size: 0.78rem; font-weight: 500;
+            color: rgba(255,255,255,0.55);
+            text-align: center;
+        }
+        .style-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.04);
+        }
+        .style-card.selected {
+            border-color: var(--accent);
+            background: rgba(255,107,74,0.1);
+            color: var(--accent);
+        }
+
+        /* Generate button */
+        .generate-btn {
+            width: 100%; padding: 0.85rem; border-radius: 12px;
+            border: 0; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            font-family: inherit; letter-spacing: 0.01em;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .generate-btn.primary {
+            background: linear-gradient(135deg, var(--accent), #ff8a5c);
+            color: #fff; box-shadow: 0 2px 12px var(--accent-glow);
+        }
+        .generate-btn.primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+        .generate-btn:disabled {
+            opacity: 0.45; cursor: not-allowed;
+        }
+        .btn-spinner {
+            width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 1rem; right: 1rem; z-index: 99999;
+            padding: 0.75rem 1.1rem; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 600;
+            color: #fff; max-width: 420px;
+            animation: toast-in 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .toast.error { background: #dc2626; }
+        .toast.success { background: #16a34a; }
+        .toast.info { background: #2563eb; }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* History list */
+        .ppt-history-section {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 1rem 1.25rem;
+            max-height: 220px; overflow-y: auto;
+        }
+        .ppt-history-section h4 {
+            margin: 0 0 0.6rem; font-size: 0.75rem;
+            color: rgba(255,255,255,0.4); font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .ppt-history-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.45rem 0.6rem; border-radius: 6px;
+            cursor: pointer; transition: background 0.15s;
+            font-size: 0.78rem; color: rgba(255,255,255,0.55);
+        }
+        .ppt-history-item:hover {
+            background: rgba(255,255,255,0.04); color: #e5e7eb;
+        }
+        .ppt-history-item .status-dot {
+            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+        }
+        .ppt-history-item .status-dot.completed { background: #4ade80; }
+        .ppt-history-item .status-dot.processing { background: #facc15; animation: pulse-dot 1.2s ease-in-out infinite; }
+        .ppt-history-item .status-dot.failed { background: #ef4444; }
+
+        .provider-indicator {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.65rem; padding: 0.15rem 0.5rem;
+            border-radius: 999px; font-weight: 600;
+        }
+        .provider-indicator.local {
+            background: rgba(74,244,197,0.12); color: #4AF4C5;
+            border: 1px solid rgba(74,244,197,0.2);
+        }
+        .provider-indicator.api {
+            background: rgba(96,165,250,0.12); color: #93c5fd;
+            border: 1px solid rgba(96,165,250,0.2);
+        }
+
+        @media (max-width: 800px) {
+            .ppt-main { flex-direction: column; }
+            .ppt-input-panel { width: 100%; min-width: 0; max-height: 55vh; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+            .style-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+    </style>
 </head>
 <body>
-  <main class="card">
-    <div class="badge">AI Designer Lite · 本地调试版</div>
-    <h1>该功能已暂时禁用</h1>
-    <p class="muted">当前阶段只保留用户系统、后台、文件管理和本地图片生成。PPT、视频、支付、会员充值相关功能已从界面和后端路由禁用，避免误触外部 API 或支付接口。</p>
-    <div class="actions">
-      <a href="image.html">去本地图片生成</a>
-      <a class="ghost" href="dashboard.html">返回工作台</a>
-      <a class="ghost" href="admin.html">后台管理</a>
+<div class="ppt-app">
+    <!-- Header -->
+    <header class="ppt-header">
+        <div class="ppt-header-left">
+            <div class="logo-icon">P</div>
+            <h1>AI 生成 PPT</h1>
+            <span class="badge" id="providerBadge">检测中...</span>
+        </div>
+        <div class="ppt-header-right">
+            <a href="dashboard.html">工作台</a>
+            <a href="image.html">图片生成</a>
+            <a href="ppt.html" class="active">PPT生成</a>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <div class="ppt-main">
+        <!-- Input Panel -->
+        <div class="ppt-input-panel">
+            <div class="ppt-input-scroll">
+                <div class="form-group">
+                    <label for="promptInput">PPT 主题 / 内容描述</label>
+                    <textarea id="promptInput"
+                        placeholder="描述你想生成的PPT内容，例如：&#10;做一份年度工作总结PPT，面向公司管理层汇报，包含年度目标完成情况、关键成果、数据复盘、问题反思和明年计划，风格商务专业。"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pageCount">页数</label>
+                        <input type="number" id="pageCount" value="10" min="3" max="30" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="canvasFormat">画幅比例</label>
+                        <select id="canvasFormat">
+                            <option value="ppt169" selected>16:9 宽屏</option>
+                            <option value="ppt43">4:3 经典</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" id="debugMode" style="width: auto; cursor: pointer;">
+                        <span>调试模式（跳过已生成的页面，直接导出）</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>设计风格</label>
+                    <div class="style-grid" id="styleGrid">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="audience">目标受众</label>
+                        <input type="text" id="audience" placeholder="例如：公司管理层、客户...">
+                    </div>
+                    <div class="form-group">
+                        <label for="scenario">使用场景</label>
+                        <input type="text" id="scenario" placeholder="例如：年度汇报、产品发布...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="extraRequirements">额外要求（可选）</label>
+                    <input type="text" id="extraRequirements" placeholder="例如：需要数据图表、使用公司蓝色主题...">
+                </div>
+
+                <button class="generate-btn primary" id="generateBtn" onclick="startPptGeneration()">
+                    生成 PPT
+                </button>
+                <div id="generateStatus" style="text-align:center;margin-top:0.6rem;font-size:0.78rem;color:rgba(255,255,255,0.4);min-height:1.2rem;"></div>
+            </div>
+
+            <!-- History -->
+            <div class="ppt-history-section" id="historySection" style="display:none;">
+                <h4>生成记录</h4>
+                <div id="historyList"></div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="ppt-preview-panel" id="previewPanel">
+            <div class="ppt-preview-empty" id="previewEmpty">
+                <div class="icon-lg">&#128203;</div>
+                <p>在左侧输入主题，选择风格<br>点击「生成 PPT」开始创作</p>
+            </div>
+            <div class="ppt-progress" id="previewProgress" style="display:none;"></div>
+            <div class="ppt-result" id="previewResult" style="display:none;"></div>
+        </div>
     </div>
-  </main>
+</div>
+
+<script>
+(function() {
+    var token = localStorage.getItem('aimaster_token');
+    var currentTaskId = null;
+    var pollingTimer = null;
+    var isGenerating = false;
+    var pptProviderMode = 'api'; // 'api' | 'local'
+
+    // Style definitions
+    var styles = [
+        { id: 'business', label: '商务咨询', desc: '结构清晰，数据突出' },
+        { id: 'creative', label: '创意现代', desc: '视觉冲击力强' },
+        { id: 'minimal', label: '极简专业', desc: '留白充足，信息克制' },
+        { id: 'academic', label: '学术论文', desc: '规范正式，层次清晰' },
+        { id: 'dark_tech', label: '暗色科技', desc: '适合技术架构演示' },
+        { id: 'zen', label: '禅意东方', desc: '克制留白，东方审美' },
+        { id: 'pixel', label: '像素复古', desc: '8-bit 游戏美学' },
+        { id: 'general', label: '通用专业', desc: '平衡专业与视觉' }
+    ];
+
+    // Stage definitions matching backend pipeline
+    var stageDefs = [
+        { key: 'queued', label: '任务排队' },
+        { key: 'outline', label: '整理大纲' },
+        { key: 'research', label: '检索资料' },
+        { key: 'assets', label: '准备资源' },
+        { key: 'strategist', label: '策划页面结构' },
+        { key: 'executor', label: '生成页面' },
+        { key: 'postprocess', label: '优化页面' },
+        { key: 'export', label: '导出PPTX文件' },
+        { key: 'done', label: '完成' }
+    ];
+
+    function init() {
+        renderStyleGrid();
+        checkProviderMode();
+        loadHistory();
+        handleQuickStart();
+    }
+
+    function handleQuickStart() {
+        var params = new URLSearchParams(window.location.search);
+        var prompt = params.get('prompt');
+        var source = params.get('source');
+        if (prompt && source === 'quick-start') {
+            document.getElementById('promptInput').value = decodeURIComponent(prompt);
+            // Auto-scroll to input
+            document.getElementById('promptInput').focus();
+            // Clean URL
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, '', 'ppt.html');
+            }
+        }
+    }
+
+    function renderStyleGrid() {
+        var grid = document.getElementById('styleGrid');
+        var html = '';
+        styles.forEach(function(s) {
+            html += '<div class="style-card" data-style="' + s.id + '" onclick="selectStyle(\'' + s.id + '\')" title="' + s.desc + '">' + s.label + '</div>';
+        });
+        grid.innerHTML = html;
+        // Default select first
+        selectStyle('business');
+    }
+
+    window.selectStyle = function(styleId) {
+        document.querySelectorAll('.style-card').forEach(function(el) {
+            el.classList.toggle('selected', el.dataset.style === styleId);
+        });
+    };
+
+    function getSelectedStyle() {
+        var sel = document.querySelector('.style-card.selected');
+        return sel ? sel.dataset.style : 'business';
+    }
+
+    async function checkProviderMode() {
+        try {
+            if (!token) {
+                document.getElementById('providerBadge').textContent = '请先登录';
+                document.getElementById('providerBadge').className = 'provider-indicator local';
+                return;
+            }
+            var resp = await fetch('/api/ai/image-provider/status', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (resp.ok) {
+                var data = await resp.json();
+                pptProviderMode = data.mock_mode ? 'local' : 'api';
+            } else {
+                // Fallback: check if we can reach a local endpoint
+                pptProviderMode = 'api';
+            }
+        } catch(e) {
+            pptProviderMode = 'api';
+        }
+        updateProviderBadge();
+    }
+
+    function updateProviderBadge() {
+        var badge = document.getElementById('providerBadge');
+        if (pptProviderMode === 'local') {
+            badge.textContent = '本地模式';
+            badge.className = 'provider-indicator local';
+        } else {
+            badge.textContent = 'API模式';
+            badge.className = 'provider-indicator api';
+        }
+    }
+
+    // --- History ---
+    function loadHistory() {
+        if (!token) return;
+        fetch('/api/ai/tasks?type=ppt&limit=20', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(function(r) { return r.json(); })
+        .then(function(data) {
+            var tasks = data.tasks || data.list || [];
+            if (tasks.length === 0) return;
+            document.getElementById('historySection').style.display = 'block';
+            var html = '';
+            tasks.forEach(function(t) {
+                var title = t.title || t.prompt || 'PPT';
+                if (title.length > 28) title = title.slice(0, 28) + '...';
+                html += '<div class="ppt-history-item" onclick="viewTask(' + t.id + ')">' +
+                    '<span>' + escapeHtml(title) + '</span>' +
+                    '<span class="status-dot ' + t.status + '"></span>' +
+                    '</div>';
+            });
+            document.getElementById('historyList').innerHTML = html;
+        }).catch(function() {});
+    }
+
+    window.viewTask = function(taskId) {
+        if (!token) return;
+        showToast('正在加载任务...', 'info');
+        fetch('/api/ai/tasks/' + taskId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.task) {
+                updatePreviewFromTask(data.task);
+            }
+        }).catch(function(e) {
+            showToast('加载失败: ' + e.message, 'error');
+        });
+    };
+
+    // --- Generation ---
+    window.startPptGeneration = async function() {
+        if (isGenerating) return;
+
+        var prompt = document.getElementById('promptInput').value.trim();
+        if (!prompt) {
+            showToast('请输入PPT主题或内容描述', 'error');
+            document.getElementById('promptInput').focus();
+            return;
+        }
+
+        if (!token) {
+            showToast('请先登录后再生成PPT', 'error');
+            return;
+        }
+
+        // Prepare params
+        var pageCount = parseInt(document.getElementById('pageCount').value) || 10;
+        pageCount = Math.max(3, Math.min(30, pageCount));
+        var canvasFormat = document.getElementById('canvasFormat').value;
+        var style = getSelectedStyle();
+        var audience = document.getElementById('audience').value.trim();
+        var scenario = document.getElementById('scenario').value.trim();
+        var extraRequirements = document.getElementById('extraRequirements').value.trim();
+
+        var debugMode = document.getElementById('debugMode').checked;
+        var params = {
+            pageCount: pageCount,
+            canvasFormat: canvasFormat,
+            style: style,
+            template: style,
+            debugMode: debugMode
+        };
+        if (audience) params.audience = audience;
+        if (scenario) params.scenario = scenario;
+        if (extraRequirements) params.extraRequirements = extraRequirements;
+
+        // UI state
+        isGenerating = true;
+        var btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner"></span> 正在创建任务...';
+        document.getElementById('generateStatus').textContent = '';
+
+        // Show progress panel
+        showProgressPanel();
+        renderProgress({ progress: 1, stage: 'queued', message: '正在创建PPT生成任务...' });
+
+        try {
+            var response = await fetch('/api/ai/generate/ppt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ prompt: prompt, params: params })
+            });
+
+            if (!response.ok) {
+                var errData = await response.json().catch(function() { return {}; });
+                throw new Error(errData.message || errData.error || '生成请求失败 (HTTP ' + response.status + ')');
+            }
+
+            var data = await response.json();
+            if (data.task && data.task.id) {
+                currentTaskId = data.task.id;
+                startPolling(currentTaskId);
+                document.getElementById('generateStatus').textContent = '任务 ' + currentTaskId + ' 已启动';
+            } else {
+                throw new Error('服务器未返回任务ID');
+            }
+        } catch (error) {
+            isGenerating = false;
+            btn.disabled = false;
+            btn.innerHTML = '生成 PPT';
+            showToast(error.message, 'error');
+            document.getElementById('generateStatus').textContent = '生成失败: ' + error.message;
+            showEmptyPanel();
+        }
+    };
+
+    // --- Polling ---
+    function startPolling(taskId) {
+        if (pollingTimer) clearInterval(pollingTimer);
+        pollTask(taskId);
+        pollingTimer = setInterval(function() { pollTask(taskId); }, 3000);
+    }
+
+    function stopPolling() {
+        if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+    }
+
+    async function pollTask(taskId) {
+        try {
+            var resp = await fetch('/api/ai/tasks/' + taskId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!resp.ok) return;
+            var data = await resp.json();
+            if (data.task) {
+                updatePreviewFromTask(data.task);
+            }
+        } catch(e) {
+            console.error('Poll error:', e);
+        }
+    }
+
+    function updatePreviewFromTask(task) {
+        var status = task.status;
+        var resultData = task.result_data || {};
+
+        if (status === 'processing') {
+            showProgressPanel();
+            renderProgress(resultData);
+            currentTaskId = task.id;
+            if (!pollingTimer && !isGenerating) {
+                // Viewing a past task that's still processing
+            }
+        } else if (status === 'completed') {
+            stopPolling();
+            showResultPanel(resultData, task);
+            isGenerating = false;
+            var btn = document.getElementById('generateBtn');
+            btn.disabled = false;
+            btn.innerHTML = '生成 PPT';
+            document.getElementById('generateStatus').textContent = 'PPT 生成完成！';
+            loadHistory();
+        } else if (status === 'failed') {
+            stopPolling();
+            showToast(resultData.error || task.error_message || 'PPT生成失败', 'error');
+            isGenerating = false;
+            var btn2 = document.getElementById('generateBtn');
+            btn2.disabled = false;
+            btn2.innerHTML = '生成 PPT';
+            document.getElementById('generateStatus').textContent = '生成失败';
+            showEmptyPanel();
+        }
+    }
+
+    // --- Progress rendering ---
+    function renderProgress(data) {
+        var container = document.getElementById('previewProgress');
+        var progress = data.progress || 0;
+        var stage = data.stage || '';
+        var message = data.message || '';
+        var currentPage = data.current_page || 0;
+        var totalPages = data.total_pages || 0;
+
+        var stageIndex = -1;
+        for (var i = 0; i < stageDefs.length; i++) {
+            if (stageDefs[i].key === stage) { stageIndex = i; break; }
+        }
+
+        var pageInfo = '';
+        if (currentPage > 0 && totalPages > 0) {
+            pageInfo = ' (' + currentPage + '/' + totalPages + ' 页)';
+        }
+
+        var html = '';
+        // Header
+        html += '<div class="ppt-progress-header">';
+        if (stage === 'done') {
+            html += '<div class="check-icon">&#10003;</div>';
+        } else {
+            html += '<div class="spinner"></div>';
+        }
+        html += '<div><h3>' + escapeHtml(message || '处理中...') + pageInfo + '</h3>';
+        html += '<span class="stage-text">进度 ' + Math.round(progress) + '%</span></div>';
+        html += '</div>';
+
+        // Progress bar
+        html += '<div class="ppt-progress-bar-wrap">';
+        html += '<div class="ppt-progress-bar-fill" style="width:' + Math.max(2, progress) + '%"></div>';
+        html += '</div>';
+
+        // Stage list
+        html += '<div class="ppt-stage-list">';
+        stageDefs.forEach(function(def, idx) {
+            var cls = '';
+            if (def.key === stage) cls = 'active';
+            else if (idx < stageIndex) cls = 'done';
+            html += '<div class="ppt-stage-item ' + cls + '">';
+            html += '<span class="ppt-stage-dot"></span>';
+            html += escapeHtml(def.label);
+            if (def.key === 'executor' && currentPage > 0) {
+                html += ' ' + currentPage + '/' + totalPages;
+            }
+            html += '</div>';
+        });
+        html += '</div>';
+
+        container.innerHTML = html;
+    }
+
+    // --- Result rendering ---
+    function showResultPanel(resultData, task) {
+        document.getElementById('previewEmpty').style.display = 'none';
+        document.getElementById('previewProgress').style.display = 'none';
+        var container = document.getElementById('previewResult');
+        container.style.display = 'flex';
+
+        var html = '';
+        html += '<div class="ppt-result-header">';
+        html += '<div class="check-icon">&#10003;</div>';
+        html += '<h3>' + escapeHtml(resultData.title || task.title || 'PPT') + '</h3>';
+        html += '</div>';
+
+        // Preview SVGs
+        var previews = resultData.preview_svgs || [];
+        if (previews.length > 0) {
+            html += '<div class="ppt-preview-svgs">';
+            previews.forEach(function(url, idx) {
+                html += '<div class="ppt-preview-svg-card">';
+                html += '<embed src="' + url + '" type="image/svg+xml">';
+                html += '<div class="label">第 ' + (idx + 1) + ' 页</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+        }
+
+        // Info
+        html += '<div style="margin-bottom:1rem;font-size:0.8rem;color:rgba(255,255,255,0.5);">';
+        html += '共 ' + (resultData.page_count || previews.length || '?') + ' 页';
+        if (resultData.style) html += ' &middot; 风格: ' + escapeHtml(resultData.style);
+        html += '</div>';
+
+        // Download button
+        var downloadUrl = resultData.download_url || resultData.pptx_url || task.result_url;
+        if (downloadUrl) {
+            html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
+            html += '<a href="' + downloadUrl + '" class="ppt-download-btn" download>&#128229; 下载 PPTX</a>';
+            if (resultData.project_dir) {
+                html += '<a href="' + resultData.project_dir + '" class="ppt-download-btn secondary" target="_blank">查看工程文件</a>';
+            }
+            html += '</div>';
+        }
+
+        // Billing info
+        if (resultData.billing) {
+            html += '<div style="margin-top:0.75rem;font-size:0.7rem;color:rgba(255,255,255,0.3);">';
+            html += '消耗积分: ' + (resultData.billing.charged_credits || '?');
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    function showProgressPanel() {
+        document.getElementById('previewEmpty').style.display = 'none';
+        document.getElementById('previewResult').style.display = 'none';
+        document.getElementById('previewProgress').style.display = 'flex';
+    }
+
+    function showEmptyPanel() {
+        document.getElementById('previewProgress').style.display = 'none';
+        document.getElementById('previewResult').style.display = 'none';
+        document.getElementById('previewEmpty').style.display = 'flex';
+    }
+
+    // --- Utilities ---
+    function showToast(msg, type) {
+        type = type || 'info';
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+        }, 3500);
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str || ''));
+        return div.innerHTML;
+    }
+
+    // Init
+    init();
+})();
+</script>
 </body>
 </html>
