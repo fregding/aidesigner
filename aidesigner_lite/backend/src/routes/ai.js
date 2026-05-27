@@ -3367,4 +3367,46 @@ router.get('/convert/formats', (req, res) => {
   });
 });
 
+// Image provider status for local debugging / admin check
+router.get('/image-provider/status', auth, async (req, res) => {
+  try {
+    const runtimeConfig = RuntimeConfigService.getRuntimeConfig();
+    const providerMode = AiService.imageProviderMode ? AiService.imageProviderMode(runtimeConfig) : (process.env.IMAGE_PROVIDER || '');
+    const isMock = AiService.isMockImageMode ? AiService.isMockImageMode(runtimeConfig) : providerMode === 'mock';
+    const imageConfig = isMock
+      ? AiService.getLocalImageRuntimeConfig(runtimeConfig, 'local')
+      : AiService.getImageRuntimeConfig(runtimeConfig, 'primary');
+
+    const healthUrl = imageConfig.baseUrl.replace(/\/v1$/i, '') + '/health';
+    let reachable = false;
+    let health = null;
+    let error = '';
+    try {
+      const axios = require('axios');
+      const response = await axios.get(healthUrl, { timeout: 5000, validateStatus: () => true });
+      reachable = response.status >= 200 && response.status < 500;
+      health = response.data;
+    } catch (healthError) {
+      error = healthError.message;
+    }
+
+    res.json({
+      provider_mode: providerMode || (isMock ? 'mock' : 'openai-compatible'),
+      mock_mode: isMock,
+      base_url: imageConfig.baseUrl,
+      model: imageConfig.model,
+      reachable,
+      health,
+      error
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      provider_mode: process.env.IMAGE_PROVIDER || '',
+      hint: '检查 backend/.env.local 里的 IMAGE_PROVIDER、IMAGE_BASE_URL、IMAGE_API_KEY、IMAGE_MODEL'
+    });
+  }
+});
+
+
 module.exports = router;

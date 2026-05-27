@@ -10,7 +10,6 @@ backend/node_modules/
 backend/.env
 backend/.env.*
 !backend/.env.example
-!backend/.env.local.example
 
 backend/data/
 backend/uploads/
@@ -42,3 +41,8 @@ runtime/
 *.blob
 *.pt
 *.pth
+
+# Local generated environments / logs
+local-image-server/__pycache__/
+start_all.log
+backend/.env.local

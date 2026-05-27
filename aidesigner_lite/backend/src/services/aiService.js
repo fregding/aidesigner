@@ -497,6 +497,17 @@ class AiService {
   }
 
   static async performImageGenerationRequest({ userId, taskId, prompt, params, outputFormat, imageConfig }) {
+if (imageConfig.providerType === 'pollinations') {
+  return await this.performPollinationsImageGenerationRequest({
+    userId,
+    taskId,
+    prompt,
+    params,
+    outputFormat,
+    imageConfig
+  });
+}
+
     const resolvedSize = this.resolveImageSize(params, imageConfig.model);
     const requestedN = Math.max(1, Math.min(parseInt(params?.n, 10) || 1, 4));
     const requestBody = {
@@ -510,6 +521,17 @@ class AiService {
       user: `user_${userId}_task_${taskId}`
     };
     this.applyOptionalImageRequestParams(requestBody, params, imageConfig.model);
+
+    console.log('[Image Generation] request', {
+      channel: imageConfig.channel,
+      baseUrl: imageConfig.baseUrl,
+      model: imageConfig.model,
+      size: resolvedSize,
+      quality: params?.quality || imageConfig.quality,
+      n: requestedN,
+      outputFormat,
+      promptChars: String(prompt || '').length
+    });
 
     let response;
     try {
@@ -730,52 +752,74 @@ class AiService {
     });
   }
 
-  static isLocalImageMode(runtimeConfig = {}) {
-    const value = String(
-      process.env.ENABLE_LOCAL_IMAGE ||
+  static imageProviderMode(runtimeConfig = {}) {
+    return String(
       process.env.IMAGE_PROVIDER ||
       runtimeConfig.imageProvider ||
       runtimeConfig.imageProviderType ||
-      ''
+      (String(process.env.ENABLE_LOCAL_IMAGE || '').trim().toLowerCase() === 'true' ? 'mock' : '')
     ).trim().toLowerCase();
+  }
 
-    return value === 'true' || value === '1' || value === 'local' || value === 'mock';
+  static isMockImageMode(runtimeConfig = {}) {
+    const value = this.imageProviderMode(runtimeConfig);
+    return value === 'mock' || value === 'local-mock' || value === 'placeholder' || value === 'offline';
+  }
+
+  static isLocalImageMode(runtimeConfig = {}) {
+    return this.isMockImageMode(runtimeConfig);
+  }
+
+  static isOpenAiCompatibleImageMode(runtimeConfig = {}) {
+    const value = this.imageProviderMode(runtimeConfig);
+    return [
+      'openai',
+      'openai-compatible',
+      'real-api',
+      'api',
+      'localai',
+      'local-ai',
+      'sd-webui',
+      'sdwebui',
+      'automatic1111'
+    ].includes(value);
   }
 
   static getLocalImageRuntimeConfig(runtimeConfig = {}, channel = 'local') {
     const baseUrl = this.normalizeOpenAiCompatibleBaseUrl(
       process.env.LOCAL_IMAGE_API_BASE_URL ||
-      process.env.IMAGE_BASE_URL ||
       runtimeConfig.localImageApiBaseUrl ||
       runtimeConfig.localImageBaseUrl ||
-      runtimeConfig.imageBaseUrl ||
-      'http://host.docker.internal:18080/v1'
+      'http://127.0.0.1:18080/v1'
     );
 
     const apiKey =
       process.env.LOCAL_IMAGE_API_KEY ||
-      process.env.IMAGE_API_KEY ||
       runtimeConfig.localImageApiKey ||
-      runtimeConfig.imageApiKey ||
       'local-dev-key';
 
     if (!baseUrl || !apiKey) {
-      throw new Error('本地图片生成缺少 Base URL 或 API Key');
+      throw new Error('本地占位图片服务缺少 Base URL 或 API Key');
     }
 
     return {
-      id: 'local-image',
-      name: 'Local Mock Image',
+      id: 'local-mock-image',
+      name: 'Local Offline Placeholder Image',
       channel,
       baseUrl,
       apiKey,
-      model: process.env.LOCAL_IMAGE_MODEL || process.env.IMAGE_MODEL || runtimeConfig.localImageModel || runtimeConfig.imageModel || 'local-mock-image',
+      model: process.env.LOCAL_IMAGE_MODEL || runtimeConfig.localImageModel || 'local-cpu-safe-image',
       quality: runtimeConfig.imageQuality || 'standard',
       timeoutMs: Math.max(parseInt(process.env.IMAGE_TIMEOUT_MS || runtimeConfig.imageTimeoutMs, 10) || 600000, 120000)
     };
   }
 
   static getImageProviderConfigs(runtimeConfig = {}) {
+
+   if (this.isPollinationsImageProvider(runtimeConfig)) {
+     return [this.getPollinationsImageRuntimeConfig(runtimeConfig, 'primary')];
+   }
+
     if (this.isLocalImageMode(runtimeConfig)) {
       return [this.getLocalImageRuntimeConfig(runtimeConfig, 'local')];
     }
@@ -831,8 +875,8 @@ class AiService {
     }
 
     const provider = candidate.provider || {};
-    const baseUrl = this.normalizeOpenAiCompatibleBaseUrl(provider.baseUrl || runtimeConfig.imageBaseUrl || '');
-    const apiKey = provider.apiKey || runtimeConfig.imageApiKey || runtimeConfig.providerApiKey;
+    const baseUrl = this.normalizeOpenAiCompatibleBaseUrl(provider.baseUrl || process.env.IMAGE_BASE_URL || process.env.REAL_IMAGE_API_BASE_URL || runtimeConfig.imageBaseUrl || '');
+    const apiKey = provider.apiKey || process.env.IMAGE_API_KEY || process.env.REAL_IMAGE_API_KEY || runtimeConfig.imageApiKey || runtimeConfig.providerApiKey;
     if (!baseUrl || !apiKey) {
       throw new Error('图片生成缺少 Base URL 或 API Key');
     }
@@ -859,11 +903,11 @@ class AiService {
     }
 
     const baseUrl = this.normalizeOpenAiCompatibleBaseUrl(isFallback
-      ? runtimeConfig.imageFallbackBaseUrl
-      : (runtimeConfig.imageBaseUrl || process.env.IMAGE_BASE_URL || process.env.LOCAL_IMAGE_API_BASE_URL || 'https://timebackward.com/v1'));
+      ? (process.env.IMAGE_FALLBACK_BASE_URL || runtimeConfig.imageFallbackBaseUrl)
+      : (process.env.IMAGE_BASE_URL || process.env.REAL_IMAGE_API_BASE_URL || runtimeConfig.imageBaseUrl));
     const apiKey = isFallback
-      ? (runtimeConfig.imageFallbackApiKey || runtimeConfig.anthropicFallbackApiKey || runtimeConfig.providerApiKey)
-      : (runtimeConfig.imageApiKey || runtimeConfig.anthropicFallbackApiKey || runtimeConfig.providerApiKey || process.env.IMAGE_API_KEY || process.env.LOCAL_IMAGE_API_KEY);
+      ? (process.env.IMAGE_FALLBACK_API_KEY || runtimeConfig.imageFallbackApiKey || runtimeConfig.anthropicFallbackApiKey || runtimeConfig.providerApiKey)
+      : (process.env.IMAGE_API_KEY || process.env.REAL_IMAGE_API_KEY || runtimeConfig.imageApiKey || runtimeConfig.anthropicFallbackApiKey || runtimeConfig.providerApiKey);
 
     if (!baseUrl || !apiKey) {
       throw new Error('图片生成缺少 Base URL 或 API Key');
@@ -873,7 +917,9 @@ class AiService {
       channel: isFallback ? 'fallback' : 'primary',
       baseUrl,
       apiKey,
-      model: isFallback ? (runtimeConfig.imageFallbackModel || runtimeConfig.imageModel || 'gpt-image-2') : (runtimeConfig.imageModel || 'gpt-image-2'),
+      model: isFallback
+        ? (process.env.IMAGE_FALLBACK_MODEL || runtimeConfig.imageFallbackModel || process.env.IMAGE_MODEL || runtimeConfig.imageModel || 'gpt-image-2')
+        : (process.env.IMAGE_MODEL || process.env.REAL_IMAGE_MODEL || runtimeConfig.imageModel || 'gpt-image-2'),
       quality: runtimeConfig.imageQuality || 'high',
       timeoutMs: Math.max(parseInt(runtimeConfig.imageTimeoutMs, 10) || 600000, 120000)
     };
@@ -1121,6 +1167,100 @@ class AiService {
     if (/\/v1$/i.test(normalized)) return normalized;
     return `${normalized}/v1`;
   }
+static isPollinationsImageProvider(runtimeConfig = {}) {
+  const provider = String(
+    process.env.IMAGE_PROVIDER ||
+    runtimeConfig.imageProvider ||
+    runtimeConfig.imageProviderType ||
+    ''
+  ).trim().toLowerCase();
+
+  return provider === 'pollinations' || provider === 'pollinations.ai';
+}
+
+static normalizePlainBaseUrl(baseUrl = '') {
+  return String(baseUrl || '').replace(/\/+$/, '');
+}
+
+static getPollinationsImageRuntimeConfig(runtimeConfig = {}, channel = 'primary') {
+  return {
+    id: 'pollinations',
+    name: 'Pollinations',
+    channel,
+    providerType: 'pollinations',
+    baseUrl: this.normalizePlainBaseUrl(
+      process.env.IMAGE_BASE_URL ||
+      runtimeConfig.imageBaseUrl ||
+      'https://image.pollinations.ai'
+    ),
+    apiKey: process.env.IMAGE_API_KEY || runtimeConfig.imageApiKey || '',
+    model: process.env.IMAGE_MODEL || runtimeConfig.imageModel || 'flux',
+    quality: runtimeConfig.imageQuality || 'standard',
+    timeoutMs: Math.max(
+      parseInt(process.env.IMAGE_TIMEOUT_MS || runtimeConfig.imageTimeoutMs, 10) || 600000,
+      120000
+    )
+  };
+}
+
+static parseImageSizeToWidthHeight(size = '1024x1024') {
+  const match = String(size || '').match(/(\d+)\s*x\s*(\d+)/i);
+  if (!match) {
+    return { width: 1024, height: 1024 };
+  }
+
+  return {
+    width: Math.max(256, Math.min(parseInt(match[1], 10) || 1024, 1536)),
+    height: Math.max(256, Math.min(parseInt(match[2], 10) || 1024, 1536))
+  };
+}
+
+static async performPollinationsImageGenerationRequest({ userId, taskId, prompt, params, outputFormat, imageConfig }) {
+  const resolvedSize = this.resolveImageSize(params, imageConfig.model);
+  const { width, height } = this.parseImageSizeToWidthHeight(resolvedSize);
+
+  const query = new URLSearchParams({
+    model: imageConfig.model || 'flux',
+    width: String(width),
+    height: String(height),
+    seed: String(params?.seed || Date.now()),
+    enhance: String(params?.enhance ?? true),
+    safe: 'true',
+    nologo: 'true'
+  });
+
+  if (imageConfig.apiKey) {
+    query.set('key', imageConfig.apiKey);
+  }
+
+  const url = `${imageConfig.baseUrl}/prompt/${encodeURIComponent(prompt)}?${query.toString()}`;
+
+  const response = await axios.get(url, {
+    responseType: 'arraybuffer',
+    timeout: imageConfig.timeoutMs,
+    validateStatus: status => status >= 200 && status < 300
+  });
+
+  const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
+
+  if (!contentType.startsWith('image/')) {
+    const text = Buffer.from(response.data || '').toString('utf8');
+    const error = new Error(text || 'Pollinations 未返回图片');
+    error.code = 'POLLINATIONS_NON_IMAGE_RESPONSE';
+    throw error;
+  }
+
+  const b64 = Buffer.from(response.data).toString('base64');
+
+  return {
+    data: [
+      {
+        b64_json: b64
+      }
+    ],
+    _image_provider: this.safeImageProviderInfo(imageConfig)
+  };
+}
 
   static normalizeKlingBaseUrl(baseUrl = '') {
     return String(baseUrl || '').replace(/\/+$/, '').replace(/\/v1$/i, '');
