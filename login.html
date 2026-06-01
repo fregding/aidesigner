@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - AI Designer</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .login-header .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            margin-bottom: 0.875rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.625rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-tab:hover {
+            background: var(--bg-secondary);
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+        }
+
+        .auth-form.hidden {
+            display: none;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            padding: 0.75rem 0.9375rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group input.invite-code-input {
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-secondary);
+        }
+
+        .password-input-wrapper input {
+            padding-right: 2.75rem;
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .form-inline-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -0.25rem;
+        }
+
+        .text-action-btn {
+            border: none;
+            background: transparent;
+            color: var(--primary-light);
+            font: inherit;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.125rem 0;
+        }
+
+        .text-action-btn:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .verification-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 118px;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+
+        .verification-row input {
+            min-width: 0;
+        }
+
+        .verification-send-btn {
+            min-height: 46px;
+            padding: 0 0.75rem;
+            border: 1px solid rgba(255, 107, 74, 0.32);
+            border-radius: var(--radius-md);
+            background: rgba(255, 107, 74, 0.1);
+            color: var(--primary-light);
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .verification-send-btn:hover:not(:disabled) {
+            background: rgba(255, 107, 74, 0.16);
+            border-color: rgba(255, 159, 107, 0.48);
+            color: #fff;
+        }
+
+        .verification-send-btn:disabled {
+            opacity: 0.58;
+            cursor: not-allowed;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.25rem;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--ppt-glow);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 0.875rem;
+        }
+
+        .back-home a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: color 0.2s;
+        }
+
+        .back-home a:hover {
+            color: var(--primary);
+        }
+
+        .error-msg {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #FF6B6B;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        .success-msg {
+            background: rgba(74, 244, 197, 0.1);
+            border: 1px solid rgba(74, 244, 197, 0.3);
+            color: var(--accent);
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            text-align: center;
+            display: none;
+        }
+
+        .success-msg.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .login-page {
+                align-items: flex-start;
+                padding: 1rem 0.875rem;
+            }
+
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-header {
+                margin-bottom: 1rem;
+            }
+
+            .login-header .logo {
+                margin-bottom: 0.75rem;
+            }
+
+            .login-card {
+                padding: 1rem;
+                border-radius: 20px;
+            }
+
+            .verification-row {
+                grid-template-columns: 1fr;
+            }
+
+            .verification-send-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body data-disable-theme-toggle="true">
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon" style="width: 48px; height: 48px;">
+                        <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                    </div>
+                    <span class="logo-text" style="font-size: 1.5rem;">AI Designer</span>
+                </a>
+                <h1 id="formTitle">登录账号</h1>
+                <p id="formSubtitle">欢迎回来，开始你的AI创作之旅</p>
+            </div>
+
+            <div class="login-card">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchTab('login')">登录</button>
+                    <button class="auth-tab" onclick="switchTab('register')">注册</button>
+                </div>
+
+                <div class="error-msg" id="errorMsg"></div>
+                <div class="success-msg" id="successMsg"></div>
+
+                <!-- 登录表单 -->
+                <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="loginPassword" placeholder="输入密码" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)" title="显示密码">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="loginBtn">
+                        <span>登录</span>
+                    </button>
+                    <div class="form-inline-action">
+                        <button type="button" class="text-action-btn" onclick="switchTab('reset')">忘记密码？邮箱重置</button>
+                    </div>
+                </form>
+
+                <!-- 注册表单 -->
+                <form class="auth-form hidden" id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="regUsername" placeholder="给自己起个名字" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="regEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邀请码</label>
+                        <input type="text" id="regInviteCode" class="invite-code-input" placeholder="选填，填写后注册奖励1天VIP" autocomplete="off">
+                        <div class="form-hint">通过邀请链接进入时会自动填入。</div>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱验证码</label>
+                        <div class="verification-row">
+                            <input type="text" id="regVerificationCode" placeholder="输入6位验证码" inputmode="numeric" maxlength="6" required>
+                            <button type="button" class="verification-send-btn" id="regSendCodeBtn" onclick="sendRegisterCode()">发送验证码</button>
+                        </div>
+                        <div class="form-hint">验证码会发送到上面的邮箱，10分钟内有效。</div>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="regPassword" placeholder="至少6位密码" minlength="6" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)" title="显示密码">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>确认密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="regConfirm" placeholder="再次输入密码" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('regConfirm', this)" title="显示密码">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="registerBtn">
+                        <span>注册</span>
+                    </button>
+                </form>
+
+                <!-- 找回密码表单 -->
+                <form class="auth-form hidden" id="resetForm" onsubmit="handleResetPassword(event)">
+                    <div class="form-group">
+                        <label>账号邮箱</label>
+                        <input type="email" id="resetEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱验证码</label>
+                        <div class="verification-row">
+                            <input type="text" id="resetVerificationCode" placeholder="输入6位验证码" inputmode="numeric" maxlength="6" required>
+                            <button type="button" class="verification-send-btn" id="resetSendCodeBtn" onclick="sendPasswordResetCode()">发送验证码</button>
+                        </div>
+                        <div class="form-hint">验证码会发送到账号邮箱，10分钟内有效。</div>
+                    </div>
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="resetPassword" placeholder="至少6位新密码" minlength="6" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('resetPassword', this)" title="显示密码">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="resetConfirm" placeholder="再次输入新密码" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('resetConfirm', this)" title="显示密码">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="resetBtn">
+                        <span>重置密码并登录</span>
+                    </button>
+                    <div class="form-inline-action">
+                        <button type="button" class="text-action-btn" onclick="switchTab('login')">想起来了，返回登录</button>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="back-home">
+                <a href="index.html">← 返回首页</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000/api' : '/api';
+        let currentTab = 'login';
+        let registerCodeTimer = null;
+        let registerCodeCooldown = 0;
+        let resetCodeTimer = null;
+        let resetCodeCooldown = 0;
+        const params = new URLSearchParams(window.location.search);
+        const redirectAfterLogin = params.get('redirect') || 'dashboard.html';
+        const inviteParam = normalizeInviteCode(params.get('invite') || params.get('ref') || params.get('code') || '');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedInviteCode = inviteParam || normalizeInviteCode(localStorage.getItem('aimaster_invite_code') || '');
+            if (savedInviteCode) {
+                localStorage.setItem('aimaster_invite_code', savedInviteCode);
+                const inviteInput = document.getElementById('regInviteCode');
+                if (inviteInput) inviteInput.value = savedInviteCode;
+            }
+
+            const tab = params.get('tab');
+            if (tab === 'reset') {
+                switchTab('reset');
+            } else if (tab === 'register' || savedInviteCode) {
+                switchTab('register');
+            } else {
+                switchTab('login');
+            }
+        });
+
+        function normalizeInviteCode(value) {
+            return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>`;
+                btn.title = '隐藏密码';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>`;
+                btn.title = '显示密码';
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = ['login', 'register', 'reset'].includes(tab) ? tab : 'login';
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            const loginTab = document.querySelector('.auth-tab:first-child');
+            const registerTab = document.querySelector('.auth-tab:last-child');
+            if (currentTab === 'register') {
+                registerTab.classList.add('active');
+            } else {
+                loginTab.classList.add('active');
+            }
+
+            document.getElementById('loginForm').classList.toggle('hidden', currentTab !== 'login');
+            document.getElementById('registerForm').classList.toggle('hidden', currentTab !== 'register');
+            document.getElementById('resetForm').classList.toggle('hidden', currentTab !== 'reset');
+
+            if (currentTab === 'login') {
+                document.getElementById('formTitle').textContent = '登录账号';
+                document.getElementById('formSubtitle').textContent = '欢迎回来，开始你的AI创作之旅';
+            } else if (currentTab === 'register') {
+                document.getElementById('formTitle').textContent = '注册账号';
+                document.getElementById('formSubtitle').textContent = '创建账号，开启AI创作之旅';
+            } else {
+                const resetEmail = document.getElementById('resetEmail');
+                const loginEmail = document.getElementById('loginEmail');
+                if (resetEmail && loginEmail?.value && !resetEmail.value) {
+                    resetEmail.value = loginEmail.value.trim();
+                }
+                document.getElementById('formTitle').textContent = '重置密码';
+                document.getElementById('formSubtitle').textContent = '通过邮箱验证码重新设置密码';
+            }
+
+            hideMessages();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMsg').classList.remove('show');
+            document.getElementById('successMsg').classList.remove('show');
+        }
+
+        function setLoading(btn, loading, text) {
+            btn.disabled = loading;
+            btn.innerHTML = loading ? '<div class="spinner"></div><span>处理中...</span>' : `<span>${text}</span>`;
+        }
+
+        function setRegisterCodeCooldown(seconds = 60) {
+            const btn = document.getElementById('regSendCodeBtn');
+            registerCodeCooldown = seconds;
+            clearInterval(registerCodeTimer);
+
+            const render = () => {
+                if (!btn) return;
+                if (registerCodeCooldown <= 0) {
+                    btn.disabled = false;
+                    btn.textContent = '发送验证码';
+                    clearInterval(registerCodeTimer);
+                    registerCodeTimer = null;
+                    return;
+                }
+                btn.disabled = true;
+                btn.textContent = `${registerCodeCooldown}s后重发`;
+                registerCodeCooldown -= 1;
+            };
+
+            render();
+            registerCodeTimer = setInterval(render, 1000);
+        }
+
+        function setResetCodeCooldown(seconds = 60) {
+            const btn = document.getElementById('resetSendCodeBtn');
+            resetCodeCooldown = seconds;
+            clearInterval(resetCodeTimer);
+
+            const render = () => {
+                if (!btn) return;
+                if (resetCodeCooldown <= 0) {
+                    btn.disabled = false;
+                    btn.textContent = '发送验证码';
+                    clearInterval(resetCodeTimer);
+                    resetCodeTimer = null;
+                    return;
+                }
+                btn.disabled = true;
+                btn.textContent = `${resetCodeCooldown}s后重发`;
+                resetCodeCooldown -= 1;
+            };
+
+            render();
+            resetCodeTimer = setInterval(render, 1000);
+        }
+
+        async function sendRegisterCode() {
+            hideMessages();
+            const email = document.getElementById('regEmail').value.trim();
+            const btn = document.getElementById('regSendCodeBtn');
+
+            if (!email) {
+                showError('请先填写邮箱');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/send-register-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || '验证码发送失败');
+
+                showSuccess(data.message || '验证码已发送，请查看邮箱');
+                setRegisterCodeCooldown(60);
+            } catch (error) {
+                showError(error.message);
+                btn.disabled = false;
+                btn.textContent = '发送验证码';
+            }
+        }
+
+        async function sendPasswordResetCode() {
+            hideMessages();
+            const email = document.getElementById('resetEmail').value.trim();
+            const btn = document.getElementById('resetSendCodeBtn');
+
+            if (!email) {
+                showError('请先填写账号邮箱');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/send-password-reset-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || '重置验证码发送失败');
+
+                showSuccess(data.message || '重置验证码已发送，请查看邮箱');
+                setResetCodeCooldown(60);
+            } catch (error) {
+                showError(error.message);
+                btn.disabled = false;
+                btn.textContent = '发送验证码';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideMessages();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                showError('请填写完整信息');
+                return;
+            }
+
+            setLoading(btn, true, '登录');
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || '登录失败');
+
+                localStorage.setItem('aimaster_token', data.token);
+                localStorage.setItem('aimaster_user', JSON.stringify(data.user));
+
+                showSuccess('登录成功！正在跳转...');
+                setTimeout(() => location.href = redirectAfterLogin, 1000);
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(btn, false, '登录');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            hideMessages();
+
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const inviteCode = normalizeInviteCode(document.getElementById('regInviteCode').value);
+            const verificationCode = document.getElementById('regVerificationCode').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+            const btn = document.getElementById('registerBtn');
+
+            if (!username || !email || !verificationCode || !password) {
+                showError('请填写完整信息');
+                return;
+            }
+
+            if (password !== confirm) {
+                showError('两次密码输入不一致');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('密码至少6位');
+                return;
+            }
+
+            setLoading(btn, true, '注册');
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, verificationCode, inviteCode })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || '注册失败');
+
+                localStorage.removeItem('aimaster_invite_code');
+                if (data.token && data.user) {
+                    localStorage.setItem('aimaster_token', data.token);
+                    localStorage.setItem('aimaster_user', JSON.stringify(data.user));
+                    showSuccess(inviteCode ? '注册成功，1天VIP奖励已生效！正在进入...' : '注册成功！正在进入...');
+                    setTimeout(() => location.replace(redirectAfterLogin), 800);
+                    return;
+                }
+
+                showSuccess('注册成功，请登录');
+                setTimeout(() => switchTab('login'), 800);
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(btn, false, '注册');
+            }
+        }
+
+        async function handleResetPassword(e) {
+            e.preventDefault();
+            hideMessages();
+
+            const email = document.getElementById('resetEmail').value.trim();
+            const verificationCode = document.getElementById('resetVerificationCode').value.trim();
+            const newPassword = document.getElementById('resetPassword').value;
+            const confirm = document.getElementById('resetConfirm').value;
+            const btn = document.getElementById('resetBtn');
+
+            if (!email || !verificationCode || !newPassword) {
+                showError('请填写完整信息');
+                return;
+            }
+
+            if (newPassword !== confirm) {
+                showError('两次新密码输入不一致');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showError('新密码至少6位');
+                return;
+            }
+
+            setLoading(btn, true, '重置密码并登录');
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, verificationCode, newPassword })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || '重置密码失败');
+
+                if (data.token && data.user) {
+                    localStorage.setItem('aimaster_token', data.token);
+                    localStorage.setItem('aimaster_user', JSON.stringify(data.user));
+                    showSuccess('密码已重置，正在进入...');
+                    setTimeout(() => location.replace(redirectAfterLogin), 800);
+                    return;
+                }
+
+                showSuccess('密码已重置，请使用新密码登录');
+                setTimeout(() => switchTab('login'), 800);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(btn, false, '重置密码并登录');
+            }
+        }
+    </script>
+    <script src="assets/js/site-brand.js"></script>
+</body>
+</html>

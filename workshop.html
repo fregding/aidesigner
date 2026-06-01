@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创意工坊 - AI Designer</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        :root {
+            --workshop: #f8c86b;
+            --workshop-soft: rgba(248, 200, 107, 0.16);
+        }
+
+        body.workshop-body .tool-page {
+            height: auto;
+            min-height: 100vh;
+            overflow: visible;
+        }
+
+        .workshop-main {
+            width: min(1180px, calc(100% - 3rem));
+            margin: 0 auto;
+            padding: 3rem 0 4rem;
+        }
+
+        .workshop-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+            gap: clamp(1.5rem, 4vw, 3rem);
+            align-items: center;
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at 8% 15%, rgba(248, 200, 107, 0.1), transparent 28%),
+                radial-gradient(circle at 85% 85%, rgba(74, 244, 197, 0.06), transparent 30%),
+                linear-gradient(145deg, rgba(18, 18, 24, 0.9), rgba(26, 21, 20, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(248, 200, 107, 0.12);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(248, 200, 107, 0.95);
+            letter-spacing: 0.02em;
+        }
+
+        .badge-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #f8c86b;
+            box-shadow: 0 0 6px rgba(248, 200, 107, 0.6);
+        }
+
+        .workshop-hero h1 {
+            font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.015em;
+            line-height: 1.15;
+        }
+
+        .hero-desc {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            max-width: 500px;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            padding: 0 1.4rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, rgba(248, 200, 107, 0.2), rgba(248, 200, 107, 0.12));
+            color: #f8c86b;
+            border: 1px solid rgba(248, 200, 107, 0.3);
+        }
+
+        .action-btn.primary:hover {
+            background: linear-gradient(135deg, rgba(248, 200, 107, 0.28), rgba(248, 200, 107, 0.18));
+            border-color: rgba(248, 200, 107, 0.45);
+        }
+
+        .action-btn.outline {
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn.outline:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .action-btn.ghost {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .action-btn.ghost:hover {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .hero-image {
+            position: relative;
+            z-index: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .workshop-hero {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+
+            .hero-stats {
+                flex-direction: row;
+            }
+
+            .stat-card {
+                flex: 1;
+            }
+        }
+
+        .workshop-library {
+            margin-top: 1.25rem;
+        }
+
+        .library-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 2.6rem 0 1rem;
+        }
+
+        .library-head h2 {
+            margin-bottom: 0.35rem;
+            font-size: clamp(1.6rem, 3vw, 2.25rem);
+        }
+
+        .library-head p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .case-tabs {
+            display: inline-flex;
+            gap: 0.4rem;
+            padding: 0.35rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            background: rgba(12, 12, 20, 0.55);
+        }
+
+        .case-tab {
+            min-width: 94px;
+            padding: 0.55rem 0.95rem;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--text-secondary);
+            font: inherit;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-out);
+        }
+
+        .case-tab:hover,
+        .case-tab.active {
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            box-shadow: 0 8px 24px rgba(255, 107, 74, 0.22);
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.1rem;
+        }
+
+        .case-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(180px, 0.75fr) minmax(0, 1fr);
+            gap: 1rem;
+            padding: 1.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+            overflow: hidden;
+            transition: transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out), background 0.25s var(--ease-out);
+        }
+
+        .case-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(248, 200, 107, 0.28);
+            background: linear-gradient(145deg, rgba(248, 200, 107, 0.09), rgba(255, 255, 255, 0.03));
+        }
+
+        .case-card.is-hidden {
+            display: none;
+        }
+
+        .case-preview {
+            min-height: 220px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 25% 18%, rgba(255, 255, 255, 0.24), transparent 24%),
+                linear-gradient(145deg, rgba(248, 200, 107, 0.2), rgba(255, 107, 74, 0.08));
+            overflow: hidden;
+        }
+
+        .ppt-preview-art {
+            height: 100%;
+            padding: 1rem;
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .ppt-preview-top {
+            display: flex;
+            gap: 0.36rem;
+        }
+
+        .ppt-preview-top span {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .ppt-preview-title {
+            width: 78%;
+            height: 1rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
+        }
+
+        .ppt-preview-lines {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .ppt-preview-lines i {
+            display: block;
+            height: 0.46rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .ppt-preview-lines i:nth-child(2) {
+            width: 72%;
+        }
+
+        .ppt-preview-pages {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.45rem;
+        }
+
+        .ppt-preview-pages span {
+            height: 2.5rem;
+            border-radius: 10px;
+            background: rgba(12, 12, 20, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .image-preview-art {
+            height: 100%;
+            position: relative;
+            background:
+                radial-gradient(circle at 68% 24%, rgba(255, 255, 255, 0.95), transparent 8%),
+                radial-gradient(circle at 38% 44%, rgba(74, 244, 197, 0.42), transparent 22%),
+                linear-gradient(145deg, rgba(107, 138, 255, 0.42), rgba(255, 107, 74, 0.2));
+        }
+
+        .image-preview-art::before,
+        .image-preview-art::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            bottom: 12%;
+            height: 34%;
+            border-radius: 32px 32px 14px 14px;
+            background: rgba(12, 12, 20, 0.52);
+            transform: skewY(-6deg);
+        }
+
+        .image-preview-art::after {
+            left: 34%;
+            right: 5%;
+            bottom: 22%;
+            height: 42%;
+            background: rgba(248, 200, 107, 0.34);
+            transform: skewY(8deg);
+        }
+
+        .image-preview-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .case-content {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .case-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .case-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 0.62rem;
+            border-radius: 999px;
+            color: var(--workshop);
+            background: var(--workshop-soft);
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .case-content h3 {
+            font-size: 1.28rem;
+            line-height: 1.25;
+        }
+
+        .case-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.93rem;
+        }
+
+        .case-outline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .case-outline span {
+            padding: 0.34rem 0.58rem;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 999px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 0.78rem;
+        }
+
+        .prompt-box {
+            padding: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 16px;
+            background: rgba(12, 12, 20, 0.42);
+        }
+
+        .prompt-box strong {
+            display: block;
+            margin-bottom: 0.45rem;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+        }
+
+        .prompt-box code {
+            display: -webkit-box;
+            color: rgba(255, 255, 255, 0.72);
+            font-family: inherit;
+            font-size: 0.84rem;
+            line-height: 1.65;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .case-actions {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .case-action {
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font: inherit;
+            font-size: 0.84rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-out);
+        }
+
+        .case-action:hover,
+        .case-action.primary {
+            border-color: rgba(248, 200, 107, 0.38);
+            background: var(--workshop-soft);
+            color: var(--workshop);
+        }
+
+        @media (max-width: 820px) {
+            .workshop-main {
+                width: min(100% - 2rem, 1180px);
+                padding-top: 1.5rem;
+            }
+
+            .library-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .case-tabs {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .case-grid,
+            .case-card {
+                grid-template-columns: 1fr;
+            }
+
+            .workshop-hero {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+<style id="aidesigner-lite-hide-disabled">
+  a[href="ppt.html"], a[href="video.html"], a[href*="user.html?view=credits"],
+  .tool-entry.ppt, .tool-entry.video, .quota-item.ppt, .quota-item.video,
+  [data-tab="payment"], #tab-payment, .wallet-offers, .wallet-pay-pill, .wallet-vip-desc,
+  .recharge-package-hint, #paymentList, #savePaymentBtn { display:none !important; }
+</style>
+</head>
+<body class="workshop-body">
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <div class="tool-page">
+        <header class="tool-header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                </div>
+                <span class="logo-text">AI Designer</span>
+            </a>
+
+            <nav class="tool-nav">
+                <a href="dashboard.html#toolSelection" class="tool-nav-link">首页</a>
+                <a href="ppt.html" class="tool-nav-link">PPT生成（已禁用）</a>
+                <a href="image.html" class="tool-nav-link">图片生成</a>
+                <a href="video.html" class="tool-nav-link">视频生成（已禁用）</a>
+                <a href="workshop.html" class="tool-nav-link active">创意工坊</a>
+            </nav>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <button class="user-trigger" id="userTrigger" type="button" aria-label="用户菜单" aria-expanded="false">
+                    <div class="user-avatar" id="userAvatar">
+                        <span id="userInitial">U</span>
+                    </div>
+                    <span class="user-nav-name" id="userNavName">用户</span>
+                    <svg class="user-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <a href="dashboard.html" class="user-menu-item">控制台</a>
+                    <a href="user.html" class="user-menu-item">用户中心</a>
+                    <a href="usage.html" class="user-menu-item">使用指南</a>
+                    <a href="admin.html" class="user-menu-item" data-admin-menu-item style="display: none;">管理后台</a>
+                    <div class="user-menu-divider"></div>
+                    <a href="#" class="user-menu-item logout" id="logoutBtn">退出登录</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="workshop-main">
+            <section class="workshop-hero">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        精选模板库
+                    </div>
+                    <h1>官方模板与提示词样板</h1>
+                    <p class="hero-desc">官方整理的 PPT 模板工程、图片案例和可复用提示词。先看样板，再复制到对应工具里生成，减少试错。</p>
+                    <div class="hero-actions">
+                        <a href="ppt.html" class="action-btn outline">PPT 生成</a>
+                        <a href="image.html" class="action-btn outline">图片生成</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="assets/images/workshop-hero.jpeg" alt="创意作品展示">
+                </div>
+            </section>
+
+            <section class="workshop-library" id="caseLibrary" aria-label="官方案例库">
+                <div class="library-head">
+                    <div>
+                        <h2>精选案例</h2>
+                        <p>先做静态官方库，后续可以接后台管理，让管理员上传模板、封面和提示词。</p>
+                    </div>
+                    <div class="case-tabs" role="tablist" aria-label="案例分类">
+                        <button class="case-tab active" type="button" data-filter="all">全部</button>
+                        <button class="case-tab" type="button" data-filter="ppt">PPT 模板</button>
+                        <button class="case-tab" type="button" data-filter="image">图片提示词</button>
+                    </div>
+                </div>
+
+                <div class="case-grid">
+                    <article class="case-card" data-kind="ppt">
+                        <div class="case-preview">
+                            <div class="ppt-preview-art">
+                                <div class="ppt-preview-top"><span></span><span></span><span></span></div>
+                                <div class="ppt-preview-title"></div>
+                                <div class="ppt-preview-lines"><i></i><i></i><i></i></div>
+                                <div class="ppt-preview-pages"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">PPT 工程</span>
+                                <span class="case-pill">融资路演</span>
+                            </div>
+                            <h3>AI SaaS 商业计划书</h3>
+                            <p>适合创业融资、产品说明、投资人沟通，结构偏“问题、方案、市场、商业模式、路线图”。</p>
+                            <div class="case-outline">
+                                <span>12 页结构</span>
+                                <span>16:9</span>
+                                <span>商务科技风</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>为一家面向企业客户的 AI 数据分析 SaaS 生成一份 12 页融资路演 PPT，受众是早期投资人，风格为深色科技商务，包含痛点、解决方案、产品架构、市场规模、商业模式、竞争优势、增长数据、融资用途和未来路线图。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="为一家面向企业客户的 AI 数据分析 SaaS 生成一份 12 页融资路演 PPT，受众是早期投资人，风格为深色科技商务，包含痛点、解决方案、产品架构、市场规模、商业模式、竞争优势、增长数据、融资用途和未来路线图。">复制提示词</button>
+                                <a href="ppt.html" class="case-action">去生成 PPT</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="case-card" data-kind="ppt">
+                        <div class="case-preview">
+                            <div class="ppt-preview-art">
+                                <div class="ppt-preview-top"><span></span><span></span><span></span></div>
+                                <div class="ppt-preview-title"></div>
+                                <div class="ppt-preview-lines"><i></i><i></i><i></i></div>
+                                <div class="ppt-preview-pages"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">PPT 工程</span>
+                                <span class="case-pill">经营复盘</span>
+                            </div>
+                            <h3>年度经营复盘模板</h3>
+                            <p>面向管理层汇报，用清晰数据叙事串起目标完成、业务亮点、问题复盘和下一年策略。</p>
+                            <div class="case-outline">
+                                <span>10 页结构</span>
+                                <span>数据图表</span>
+                                <span>稳重专业</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>生成一份年度经营复盘 PPT，受众为公司管理层，页数 10 页，风格稳重专业。内容包含年度目标回顾、核心指标完成情况、业务增长亮点、关键问题复盘、用户与收入分析、团队协作成果、下一年度策略和重点行动计划。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="生成一份年度经营复盘 PPT，受众为公司管理层，页数 10 页，风格稳重专业。内容包含年度目标回顾、核心指标完成情况、业务增长亮点、关键问题复盘、用户与收入分析、团队协作成果、下一年度策略和重点行动计划。">复制提示词</button>
+                                <a href="ppt.html" class="case-action">去生成 PPT</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="case-card" data-kind="image">
+                        <div class="case-preview">
+                            <img class="image-preview-image" src="assets/images/workshop-case-tech-city.jpg" alt="未来城市科技海报案例图">
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">图片案例</span>
+                                <span class="case-pill">品牌主视觉</span>
+                            </div>
+                            <h3>未来城市科技海报</h3>
+                            <p>适合科技发布会、AI 产品官网首屏、活动主视觉，画面突出空间层次和高级光影。</p>
+                            <div class="case-outline">
+                                <span>海报</span>
+                                <span>冷暖对比</span>
+                                <span>电影感</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>未来城市科技发布会主视觉海报，夜色中的玻璃建筑群，远处有发光的数据光轨和轻微雾气，中心是一枚悬浮的 AI 芯片符号，冷蓝与橙金色灯光对比，电影级构图，高级商业海报质感，细节丰富。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="未来城市科技发布会主视觉海报，夜色中的玻璃建筑群，远处有发光的数据光轨和轻微雾气，中心是一枚悬浮的 AI 芯片符号，冷蓝与橙金色灯光对比，电影级构图，高级商业海报质感，细节丰富。">复制提示词</button>
+                                <a href="image.html" class="case-action">去生成图片</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="case-card" data-kind="image">
+                        <div class="case-preview">
+                            <img class="image-preview-image" src="assets/images/workshop-case-product-shot.jpg" alt="电商新品场景图案例图">
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">图片案例</span>
+                                <span class="case-pill">产品摄影</span>
+                            </div>
+                            <h3>电商新品场景图</h3>
+                            <p>适合商品详情页、社媒推广和品牌橱窗图，重点是产品主体、材质、光影和购买氛围。</p>
+                            <div class="case-outline">
+                                <span>商品图</span>
+                                <span>干净背景</span>
+                                <span>高端质感</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>一张高端电商产品摄影图，主体是一瓶极简设计的智能香薰机，放在浅灰色石材台面上，旁边有柔和植物阴影，晨光从侧面照入，背景干净留白，真实摄影质感，商业广告构图，高清细节。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="一张高端电商产品摄影图，主体是一瓶极简设计的智能香薰机，放在浅灰色石材台面上，旁边有柔和植物阴影，晨光从侧面照入，背景干净留白，真实摄影质感，商业广告构图，高清细节。">复制提示词</button>
+                                <a href="image.html" class="case-action">去生成图片</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="case-card" data-kind="image">
+                        <div class="case-preview">
+                            <img class="image-preview-image" src="assets/images/workshop-case-tea-poster.jpg" alt="新中式茶饮海报案例图">
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">图片案例</span>
+                                <span class="case-pill">国潮海报</span>
+                            </div>
+                            <h3>新中式茶饮海报</h3>
+                            <p>适合餐饮新品、节日营销和本地生活推广，画面用国潮元素但避免过度拥挤。</p>
+                            <div class="case-outline">
+                                <span>国潮</span>
+                                <span>新品推广</span>
+                                <span>暖色调</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>新中式茶饮新品海报，一杯桂花乌龙奶茶置于画面中心，周围有桂花、宣纸纹理、柔和山水剪影和金色细线装饰，温暖米白与琥珀色调，现代国潮设计，高级排版留白，适合社交媒体推广。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="新中式茶饮新品海报，一杯桂花乌龙奶茶置于画面中心，周围有桂花、宣纸纹理、柔和山水剪影和金色细线装饰，温暖米白与琥珀色调，现代国潮设计，高级排版留白，适合社交媒体推广。">复制提示词</button>
+                                <a href="image.html" class="case-action">去生成图片</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="case-card" data-kind="ppt">
+                        <div class="case-preview">
+                            <div class="ppt-preview-art">
+                                <div class="ppt-preview-top"><span></span><span></span><span></span></div>
+                                <div class="ppt-preview-title"></div>
+                                <div class="ppt-preview-lines"><i></i><i></i><i></i></div>
+                                <div class="ppt-preview-pages"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+                        <div class="case-content">
+                            <div class="case-meta">
+                                <span class="case-pill">PPT 工程</span>
+                                <span class="case-pill">产品招商</span>
+                            </div>
+                            <h3>新消费品牌招商手册</h3>
+                            <p>适合渠道招商、代理合作、品牌介绍，强调品牌势能、产品矩阵和合作政策。</p>
+                            <div class="case-outline">
+                                <span>14 页结构</span>
+                                <span>品牌故事</span>
+                                <span>渠道合作</span>
+                            </div>
+                            <div class="prompt-box">
+                                <strong>官方提示词</strong>
+                                <code>为一个新消费健康饮品品牌生成 14 页招商手册 PPT，风格年轻、有品质感。内容包含品牌定位、目标人群、产品矩阵、核心卖点、市场机会、渠道优势、门店或陈列方案、合作政策、利润模型和招商联系方式。</code>
+                            </div>
+                            <div class="case-actions">
+                                <button class="case-action primary" type="button" data-copy="为一个新消费健康饮品品牌生成 14 页招商手册 PPT，风格年轻、有品质感。内容包含品牌定位、目标人群、产品矩阵、核心卖点、市场机会、渠道优势、门店或陈列方案、合作政策、利润模型和招商联系方式。">复制提示词</button>
+                                <a href="ppt.html" class="case-action">去生成 PPT</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="assets/js/site-brand.js"></script>
+    <script src="assets/js/tool-ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const caseTabs = document.querySelectorAll('.case-tab');
+            const caseCards = document.querySelectorAll('.case-card');
+            caseTabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    const filter = tab.dataset.filter || 'all';
+                    caseTabs.forEach((item) => item.classList.toggle('active', item === tab));
+                    caseCards.forEach((card) => {
+                        const visible = filter === 'all' || card.dataset.kind === filter;
+                        card.classList.toggle('is-hidden', !visible);
+                    });
+                });
+            });
+
+            async function copyWorkshopText(text) {
+                const value = String(text || '');
+                if (!value) return false;
+                if (navigator.clipboard?.writeText && window.isSecureContext) {
+                    try {
+                        await navigator.clipboard.writeText(value);
+                        return true;
+                    } catch (error) {}
+                }
+
+                const textarea = document.createElement('textarea');
+                textarea.value = value;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '-9999px';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                textarea.setSelectionRange(0, textarea.value.length);
+                let copied = false;
+                try {
+                    copied = document.execCommand('copy');
+                } finally {
+                    textarea.remove();
+                }
+                return copied;
+            }
+
+            document.querySelectorAll('[data-copy]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const text = button.dataset.copy || '';
+                    try {
+                        const copied = await copyWorkshopText(text);
+                        if (!copied) throw new Error('clipboard unavailable');
+                        window.showToolNotice?.('提示词已复制');
+                    } catch (error) {
+                        window.showToolNotice?.('复制失败，请手动选择提示词');
+                    }
+                });
+            });
+
+            const savedUser = localStorage.getItem('aimaster_user');
+            const userDropdown = document.getElementById('userDropdown');
+            if (savedUser && userDropdown) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    const name = user.username || user.name || '用户';
+                    document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
+                    document.getElementById('userNavName').textContent = name;
+                    userDropdown.style.display = 'flex';
+                } catch (e) {
+                    localStorage.removeItem('aimaster_user');
+                }
+            }
+
+            const userTrigger = document.getElementById('userTrigger');
+            const userMenu = document.getElementById('userMenu');
+            userTrigger?.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = userMenu?.classList.toggle('active');
+                userTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+            document.addEventListener('click', () => {
+                userMenu?.classList.remove('active');
+                userTrigger?.setAttribute('aria-expanded', 'false');
+            });
+            document.getElementById('logoutBtn')?.addEventListener('click', (event) => {
+                event.preventDefault();
+                localStorage.removeItem('aimaster_token');
+                localStorage.removeItem('aimaster_user');
+                location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

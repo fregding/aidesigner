@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用指南 - AI Designer</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/images/brand/ai-designer-logo-favicon-v1.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/images/brand/ai-designer-logo-nav-v1.png">
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link id="aimaster-theme-stylesheet" rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        .usage-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 7rem 1.5rem 4rem;
+        }
+
+        .usage-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+        }
+
+        .usage-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .usage-header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .usage-section {
+            margin-bottom: 3rem;
+        }
+
+        .usage-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step-list {
+            counter-reset: step;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: border-color 0.3s;
+        }
+
+        .step-item:hover {
+            border-color: var(--border-hover);
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .step-content h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .tip-box {
+            background: rgba(74, 244, 197, 0.08);
+            border: 1px solid rgba(74, 244, 197, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .tip-box svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+        }
+
+        .tip-box p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 640px) {
+            .usage-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .step-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <img src="assets/images/brand/ai-designer-logo-nav-v1.png" alt="AI Designer 标志">
+                </div>
+                <span class="logo-text">AI Designer</span>
+            </a>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html#features" class="nav-link">核心功能</a>
+                <a href="index.html#tools" class="nav-link">工具中心</a>
+                <a href="usage.html" class="nav-link">使用指南</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost btn-login" id="loginBtn">登录</a>
+                <a href="login.html?tab=register" class="btn btn-primary" id="registerBtn">注册</a>
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <button class="user-trigger" id="userTrigger" type="button" aria-label="用户菜单" aria-expanded="false">
+                        <div class="user-avatar" id="userAvatar">
+                            <span id="userInitial">U</span>
+                        </div>
+                        <span class="user-nav-name" id="userNavName">用户名</span>
+                        <svg class="user-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="user-menu" id="userMenu">
+                        <a href="dashboard.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            控制台
+                        </a>
+                        <a href="user.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            用户中心
+                        </a>
+                        <a href="usage.html" class="user-menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            使用指南
+                        </a>
+                        <a href="admin.html" class="user-menu-item admin-menu-item" id="adminMenuItem" style="display:none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            管理后台
+                        </a>
+                        <div class="user-menu-divider"></div>
+                        <a href="#" class="user-menu-item logout" id="logoutBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="index.html#features" class="mobile-nav-link">核心功能</a>
+            <a href="index.html#tools" class="mobile-nav-link">工具中心</a>
+            <a href="usage.html" class="mobile-nav-link">使用指南</a>
+            <div class="mobile-nav-actions" id="mobileNavActions">
+                <a href="login.html" class="btn btn-ghost btn-full">登录</a>
+                <a href="login.html?tab=register" class="btn btn-primary btn-full">注册</a>
+            </div>
+        </nav>
+    </div>
+
+    <main class="usage-page">
+        <div class="usage-header">
+            <h1>使用指南</h1>
+            <p>快速上手 AI Designer AI创作平台</p>
+        </div>
+
+        <!-- 快速开始 -->
+        <section class="usage-section">
+            <h2>快速开始</h2>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>注册账号</h3>
+                        <p>访问首页，点击右上角「立即开始」或「登录」按钮，在弹窗中选择「注册」标签页，填写邮箱、用户名和密码完成注册。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>登录平台</h3>
+                        <p>使用注册的邮箱和密码登录，登录后可在用户中心的钱包查看通用额度、兑换码充值并维护账号信息。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>选择创作工具</h3>
+                        <p>在控制台工具中心，选择您需要的创作类型：PPT生成、图片生成、视频生成或创意工坊。创意工坊提供官方案例、PPT 模板工程和图片提示词参考；视频生成可在管理员配置视频供应商后使用。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>输入创作描述</h3>
+                        <p>用自然语言描述您的创作需求，AI将智能理解并生成对应内容。根据需要选择尺寸、数量等参数。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>下载创作成果</h3>
+                        <p>生成完成后，可直接下载创作成果到本地。所有生成内容也会保存在您的文件列表中。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 额度说明 -->
+        <section class="usage-section">
+            <h2>额度说明</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                平台使用通用额度体系，PPT、图片、视频和对话共用同一余额。图片按张计费，PPT 按最终页数和成功嵌入的 AI 配图计费；VIP 用户生成消费享 8 折，页面会展示 VIP 专属价，实际扣费按向上取整计算。
+            </p>
+            <div class="tip-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <p>额度不足时，请前往用户中心输入兑换码。管理员可在后台生成不同额度、不同使用次数的兑换码。</p>
+            </div>
+        </section>
+
+        <!-- 功能指南 -->
+        <section class="usage-section">
+            <h2>功能使用说明</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                本页面面向日常创作使用。按下面的流程填写需求、选择参数并下载结果即可。
+            </p>
+
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number">P</div>
+                    <div class="step-content">
+                        <h3>PPT 生成</h3>
+                        <p>进入「PPT生成」，填写主题、页数、受众和汇报场景。需要套用既有风格时，上传 PPT 模板或参考资料，系统会参考模板的配色、字体层级、版式节奏和素材风格生成可下载的 PPTX。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">图</div>
+                    <div class="step-content">
+                        <h3>图片生成</h3>
+                        <p>进入「图片生成」，输入画面描述，选择比例、清晰度和输出格式。需要风格参考时可上传参考图；选择 2K 或 4K 时，系统会按对应清晰度提交生成任务。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">助</div>
+                    <div class="step-content">
+                        <h3>AI 助手</h3>
+                        <p>右侧助手可帮助整理提示词、拆解 PPT 大纲、优化图片描述和补充创作思路。直接用自然语言说明目标即可，助手回复会保留在当前页面对话中。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">档</div>
+                    <div class="step-content">
+                        <h3>任务与文件</h3>
+                        <p>生成中的任务会显示进度，完成后可下载结果。历史任务、额度余额和兑换记录可在「用户中心」查看；如果任务失败，页面会展示可读的失败原因，未成功生成的内容不会重复扣费。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 常见问题 -->
+        <section class="usage-section">
+            <h2>常见问题</h2>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number" style="background: var(--bg-card); color: var(--text-primary);">Q</div>
+                    <div class="step-content">
+                        <h3>生成失败会扣额度吗？</h3>
+                        <p>任务只有在成功保存结果后才会扣除对应额度。图片参考图或提示词刚刚失败过时，系统也会尽量拦截重复提交，避免重复消耗额度。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number" style="background: var(--bg-card); color: var(--text-primary);">Q</div>
+                    <div class="step-content">
+                        <h3>生成的PPT是什么格式？</h3>
+                        <p>PPT 生成完成后会导出为 .pptx 文件，可下载到本地，并可在 PowerPoint、WPS 或 Keynote 中继续编辑。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number" style="background: var(--bg-card); color: var(--text-primary);">Q</div>
+                    <div class="step-content">
+                        <h3>可以上传模板或参考图吗？</h3>
+                        <p>PPT 支持上传模板和参考资料，图片生成支持参考图。模板会作为风格参考参与生成，但不会简单复制原文件内容。</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number" style="background: var(--bg-card); color: var(--text-primary);">Q</div>
+                    <div class="step-content">
+                        <h3>额度用完了怎么办？</h3>
+                        <p>前往用户中心输入兑换码即可增加通用额度；兑换码由管理员在后台生成。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content" style="max-width: 900px; margin: 0 auto;">
+            <p style="text-align: center; color: var(--text-muted);">
+                © 2026 AI Designer. 保留所有权利.
+            </p>
+            <p style="text-align: center; color: var(--text-muted); margin-top: 8px;">
+                <a class="footer-icp-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026030088号</a>
+            </p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.getElementById('navbar');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const userDropdown = document.getElementById('userDropdown');
+            const userTrigger = document.getElementById('userTrigger');
+            const userMenu = document.getElementById('userMenu');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const mobileNavActions = document.getElementById('mobileNavActions');
+
+            const updateNavbarState = () => {
+                navbar?.classList.toggle('scrolled', window.scrollY > 50);
+            };
+            const isVipUser = account => {
+                if (!account || (account.role !== 'vip' && !(account.role === 'admin' && account.vip_expires_at))) return false;
+                if (!account.vip_expires_at) return true;
+                const expiresAt = new Date(account.vip_expires_at).getTime();
+                return Number.isFinite(expiresAt) && expiresAt > Date.now();
+            };
+
+            updateNavbarState();
+            window.addEventListener('scroll', updateNavbarState, { passive: true });
+
+            mobileMenuBtn?.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                mobileMenu?.classList.toggle('active');
+                document.body.style.overflow = mobileMenu?.classList.contains('active') ? 'hidden' : '';
+            });
+
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenuBtn?.classList.remove('active');
+                    mobileMenu?.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+
+            const savedUser = localStorage.getItem('aimaster_user');
+            let user = null;
+            try {
+                user = savedUser ? JSON.parse(savedUser) : null;
+            } catch (error) {
+                user = null;
+            }
+
+            if (localStorage.getItem('aimaster_token') && user) {
+                const name = user.username || user.name || '用户';
+                const initial = name.charAt(0).toUpperCase();
+
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (registerBtn) registerBtn.style.display = 'none';
+                if (userDropdown) userDropdown.style.display = 'flex';
+                document.getElementById('userNavName').textContent = name;
+                document.getElementById('userInitial').textContent = initial;
+                const isVip = isVipUser(user);
+                document.querySelectorAll('#userAvatar, .user-avatar').forEach(avatar => {
+                    avatar.classList.toggle('is-vip', isVip);
+                });
+
+                if (user.role === 'admin') {
+                    const adminItem = document.getElementById('adminMenuItem');
+                    if (adminItem) adminItem.style.display = '';
+                }
+
+                if (mobileNavActions) {
+                    const adminLink = user.role === 'admin'
+                        ? '<a href="admin.html" class="btn btn-ghost btn-full">管理后台</a>'
+                        : '';
+                    mobileNavActions.innerHTML = `
+                            <div class="mobile-user-info">
+                            <div class="mobile-user-avatar${isVip ? ' is-vip' : ''}">${initial}</div>
+                            <span>${name}</span>
+                        </div>
+                        <a href="dashboard.html" class="btn btn-ghost btn-full">控制台</a>
+                        <a href="user.html" class="btn btn-ghost btn-full">用户中心</a>
+                        ${adminLink}
+                        <a href="usage.html" class="btn btn-ghost btn-full">使用指南</a>
+                        <button class="btn btn-outline btn-full" id="mobileLogoutBtn">退出登录</button>
+                    `;
+                    document.getElementById('mobileLogoutBtn')?.addEventListener('click', handleLogout);
+                }
+            }
+
+            userTrigger?.addEventListener('click', event => {
+                event.stopPropagation();
+                const isOpen = userMenu?.classList.toggle('active');
+                userTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', event => {
+                if (userDropdown && !userDropdown.contains(event.target)) {
+                    userMenu?.classList.remove('active');
+                    userTrigger?.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            logoutBtn?.addEventListener('click', event => {
+                event.preventDefault();
+                handleLogout();
+            });
+
+            function handleLogout() {
+                localStorage.removeItem('aimaster_token');
+                localStorage.removeItem('aimaster_user');
+                window.location.reload();
+            }
+        });
+    </script>
+    <script src="assets/js/site-brand.js"></script>
+</body>
+</html>

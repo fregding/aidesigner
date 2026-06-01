@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aidesigner:local
+    container_name: aidesigner-app
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_PATH=/app/backend/data/aidesigner.sqlite
+
+      - JWT_SECRET=local-dev-jwt-secret-please-change-in-production
+      - JWT_EXPIRES_IN=7d
+
+      - ADMIN_EMAIL=admin@localhost
+      - ADMIN_PASSWORD=AdminLocal@2026
+      - ADMIN_NAME=本地管理员
+      - ADMIN_QUOTA=999999999
+      - ADMIN_IMAGE_QUOTA=999999999
+      - ADMIN_PPT_QUOTA=999999999
+      - ADMIN_VIDEO_QUOTA=999999999
+      - ADMIN_CREDITS=999999999
+
+      - ENABLE_LOCAL_IMAGE=true
+      - ENABLE_IMAGE=true
+      - IMAGE_PROVIDER=local
+
+      - LOCAL_IMAGE_API_BASE_URL=http://host.docker.internal:18080/v1
+      - LOCAL_IMAGE_API_KEY=local-dev-key
+      - LOCAL_IMAGE_MODEL=local-mock-image
+
+      - IMAGE_BASE_URL=http://host.docker.internal:18080/v1
+      - IMAGE_API_KEY=local-dev-key
+      - IMAGE_MODEL=local-mock-image
+      - IMAGE_GENERATION_MODEL=local-mock-image
+
+      - OPENAI_IMAGE_BASE_URL=http://host.docker.internal:18080/v1
+      - OPENAI_IMAGE_API_KEY=local-dev-key
+
+      - IMAGE_TIMEOUT_MS=600000
+
+      - DISABLE_PPT=true
+      - DISABLE_VIDEO=true
+      - DISABLE_PAYMENTS=true
+      - DISABLE_MEMBERSHIP=true
+      - ENABLE_ASSISTANT=false
+
+      - ENABLE_PPT=false
+      - ENABLE_VIDEO=false
+      - ENABLE_PAYMENTS=false
+      - ENABLE_MEMBERSHIP=false
+      - ENABLE_ALIPAY=false
+
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backend/uploads:/app/backend/uploads
+
+    restart: unless-stopped

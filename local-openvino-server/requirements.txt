@@ -1,0 +1,19 @@
+# Python 3.10/3.11 required on Windows. Do not use Python 3.12/3.13 for this local model server.
+# Torch is pinned below 2.9 because optimum/optimum-intel currently imports
+# torch.onnx.symbolic_opset14._attention_scale, which is missing in torch 2.9.x.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pillow==11.1.0
+python-dotenv==1.0.1
+numpy==1.26.4
+torch==2.8.0
+openvino==2024.6.0
+openvino-tokenizers==2024.6.0
+optimum==1.23.3
+optimum-intel[openvino]==1.21.0
+diffusers==0.31.0
+transformers==4.45.2
+accelerate==0.33.0
+safetensors==0.4.5
+huggingface-hub==0.25.2
+nncf==2.14.0
