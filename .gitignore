@@ -1,15 +1,23 @@
 .DS_Store
+
+# Root env files
 .env
 .env.*
 !.env.example
 !.env.docker.example
+!.env.local.example
+!.env.pollinations-ppt.example
 
 node_modules/
 backend/node_modules/
 
+# Backend env files
 backend/.env
 backend/.env.*
 !backend/.env.example
+!backend/.env.local.example
+!backend/.env.local.SD-Turbo.clean
+!backend/.env.pollinations-ppt.example
 
 backend/data/
 backend/uploads/
@@ -45,6 +53,8 @@ runtime/
 # Local generated environments / logs
 local-image-server/__pycache__/
 start_all.log
+
+# 真正的本地私密配置仍然忽略
 backend/.env.local
 
 local-openvino-server/.venv/

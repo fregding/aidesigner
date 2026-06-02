@@ -631,9 +631,7 @@ http://localhost:3000/dashboard.html
 * 本地文本服务只负责提供 Chat Completions 风格文本输出。
 * PPT 生成由后端组织流程，文本模型只提供内容和结构。
 
----
 
-另外我建议你在仓库里补一个 `backend/.env.local.example`，因为现在 `start_all.bat` 会尝试从 `backend\.env.local.SD-Turbo.clean` 创建本地配置；如果别人 clone 后没有这个文件，一键启动会卡住。脚本里确实写了找不到该模板就报错退出。([GitHub][4])
 
 [1]: https://github.com/fregding/aidesigner/tree/version-3 "GitHub - fregding/aidesigner at version-3 · GitHub"
 [2]: https://raw.githubusercontent.com/fregding/aidesigner/version-3/backend/src/index.js "raw.githubusercontent.com"
